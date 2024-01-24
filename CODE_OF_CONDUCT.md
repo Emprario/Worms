@@ -51,8 +51,8 @@ on peut utiliser deux syntaxes :
 
 - `nom_de_variable:type_var[type_contenue] = valeur` avec la variable qui contient un certain nombre (inconnu) (au moins
   une) de valeur de ce type et toujours le même type
-- `nom_de_variable:type_var[type_a|type_b|type_c] = [a,b,c]` avec le tableau qui contient toujours 3 valeurs de type
-  `type_a` puis `type_b` puis `type_c`
+- `nom_de_variable:type_var[type_a|type_b|type_c] = [a,b,c]` avec le tableau qui contient éventuellement les valeurs de type
+  `type_a` et `type_b` et `type_c`
 
 Exemple :
 
