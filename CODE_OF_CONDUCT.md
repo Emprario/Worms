@@ -62,9 +62,9 @@ bools: tuple[bool, bool] = (True, False)
 campus: set[list[str | int]] = {["La Factory", 3], ["La Maison", -1], ["New Republique", 10]} 
 ```
 
-*NB: Comme il est possible de l'observer la syntaxe du typage du tuple est différente car ce dernier est censée être un
-type construit immuable donc la place des éléments est "plus importantes" et "a le droit" d'être hétérogène et sa taille
-est normalement fixe, d'où le fait de citer le type de tout ses éléments.*
+*NB: Comme il est possible de l'observer la syntaxe du typage du tuple est différente, car ce dernier est censée être un
+type construit immuable donc la place des éléments est "plus important" et "a le droit" d'être hétérogène et sa taille
+est normalement fixe, d'où le fait de citer le type de tout ses éléments DANS l'ORDRE.*
 
 ### Typage des dictionnaires (`dict`)
 
