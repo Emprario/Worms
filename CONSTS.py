@@ -6,3 +6,4 @@ Merci de mettre des hints sur les constantes dans le programme afin de faciliter
 
 VERSION: str = "earlybuilds"
 SIZE: tuple[int, int] = (1080, 720)
+MAP_KEYWORD: str = "STARTSTOP"
