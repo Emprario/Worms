@@ -26,3 +26,22 @@ class Map:
     def print_map(self):
         """Chargerment des images en mémoire pour affichage."""
         pass
+
+
+class TriPixel:
+    """Element de base de la Map"""
+
+    def __init__(self, base_texture: str):
+        """
+        Chargement du Triangle Rectangle Pixel
+        :param base_texture: Chemin vers la texture de base du pixel
+        """
+        pass
+
+    def update_decoration(self):
+        """Se met à jour pour ajouter des textures supplémentaires au pixel"""
+        pass
+
+    def pg_flip(self):
+        """Pygame Filp : Fonction d'update spécifique au TriPixel"""
+        pass
