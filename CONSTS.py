@@ -8,3 +8,4 @@ VERSION: str = "earlybuilds"
 SIZE: tuple[int, int] = (1080, 720)
 MAP_KEYWORD: str = "STARTSTOP"
 DEFAULT_DENSITY: int = 20
+coordinate = tuple[int, int]

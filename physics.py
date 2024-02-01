@@ -4,6 +4,7 @@ Gestion de la physique pure
     - PAS DE CONSTANTES (cf CONSTS.py)
 """
 from math import pi, cos, sin
+from CONSTS import coordinate
 
 
 class BimBamBoum:
@@ -11,7 +12,7 @@ class BimBamBoum:
     pass
 
 
-def get_circle(density: int, center: tuple[int, int], radius: float) -> list[tuple[int, int]]:
+def get_circle(density: int, center: coordinate, radius: float) -> list[coordinate]:
     """
     Renvoie une liste de coordonée en forme de cercle,
     en renvoie selon la densité demandée
