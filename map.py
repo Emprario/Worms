@@ -7,7 +7,7 @@ La méthode de gestion des maps reste à déterminer
 import pygame
 
 from CONSTS import MAP_KEYWORD, DEFAULT_DENSITY, coordinate
-from physics import get_circle
+from physics import get_circle, is_inner_point
 from weapons import Weapon
 
 
@@ -57,43 +57,48 @@ class Map:
         circle = get_circle(DEFAULT_DENSITY, impact, weapon.power)
 
         # Step 2 : Get sequences of inner point
-        inners: dict[pygame.Rect, list[list[coordinate]]] = {}
-        for polygone in self.polygones:
+        inners: dict[tuple[coordinate], list[list[coordinate]]] = {}
+        for polygone in self.map:
             for point in circle:
-                if polygone.collidepoint(*point):
-                    if polygone in inners:
-                        inners[polygone][-1].append(point)
+                if is_inner_point(point, polygone):
+                    if tuple(polygone) in inners:
+                        inners[tuple(polygone)][-1].append(point)
                     else:
-                        inners[polygone] = [[point]]
+                        inners[tuple(polygone)] = [[point]]
                 else:
                     if polygone in inners:
-                        inners[polygone].append([])
+                        inners[tuple(polygone)].append([])
 
         # Step 3 : contact points association
-        rect_circle = pygame.draw.polygon(self.SURFACE, "red", circle)
-        for polygone in inners:
+        startpoints = {}  # Dict seq of points -> contact point
+        for tppolygone in inners.keys():
             # Get the points destroyed : Predecessor
-            for i in range(len(self.combinatoire[polygone])):
-                if rect_circle.collidepoint(*point):
-                    predecessor = self.combinatoire[polygone][i - 1]
-                    # successor = self.combinatoire[polygone][(i + 1) % len(self.combinatoire[polygone])]
+            for i in range(len(inners[tppolygone])):
+                j = 0
+                while len(tppolygone) == j and is_inner_point(tppolygone[j], circle):
+                    startpoints[tuple(inners[tppolygone][i])] = tppolygone[j - 1]
+                    j += 1
+                    break
+                else:
+                    # if j >= len(tppolygone)-2:  # Every point are destroyed except 1 of them
+                    ...
 
-
-
-                    # Step 4 : Delete every over point inside the circle
-        rect_circle = pygame.draw.polygon(self.SURFACE, "red", circle)
+        # Step 4 : Delete every over point inside the circle
         i = 0
         while i < len(self.map):
             j = 0
             form = self.map[i]
             while j < len(form):
-                if rect_circle.collidepoint(form[j][0], form[j][1]):
+                if is_inner_point((form[j][0], form[j][1]), circle):
                     del form[j]
                 else:
                     j += 1
                 # On ne peut pas dessiner de polygone à moins de 3 côtés
                 # if len(form) < 3:
                 #    del self.map[i]
+
+        # Step 5 : Insert new points to self.map
+        ...
 
     def create_polygones(self):
         """ Création de la map polygonale """
