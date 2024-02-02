@@ -57,48 +57,62 @@ class Map:
         circle = get_circle(DEFAULT_DENSITY, impact, weapon.power)
 
         # Step 2 : Get sequences of inner point
-        inners: dict[tuple[coordinate], list[list[coordinate]]] = {}
-        for polygone in self.map:
+        inners: dict[int, list[list[coordinate]]] = {}  # Index <- seq of points
+        for i in range(len(self.map)):
             for point in circle:
-                if is_inner_point(point, polygone):
-                    if tuple(polygone) in inners:
-                        inners[tuple(polygone)][-1].append(point)
+                if is_inner_point(point, self.map[i]):
+                    if tuple(self.map[i]) in inners:
+                        inners[i][-1].append(point)
                     else:
-                        inners[tuple(polygone)] = [[point]]
+                        inners[i] = [[point]]
                 else:
-                    if polygone in inners:
-                        inners[tuple(polygone)].append([])
+                    if self.map[i] in inners:
+                        inners[i].append([])
 
-        # Step 3 : contact points association
-        startpoints = {}  # Dict seq of points -> contact point
-        for tppolygone in inners.keys():
-            # Get the points destroyed : Predecessor
-            for i in range(len(inners[tppolygone])):
-                j = 0
-                while len(tppolygone) == j and is_inner_point(tppolygone[j], circle):
-                    startpoints[tuple(inners[tppolygone][i])] = tppolygone[j - 1]
-                    j += 1
-                    break
+        # Step 3 : contact points association + add point to self.map
+        registered_predecessors: list[coordinate] = []
+        # Parcours à la fois les listes à insérer et lindex du polygone dans self.map
+        for idx, seq in inners.items():
+            pointer = 0
+            id_seq = 0
+            registration = False
+
+            # Cherche tant qu'on n'a pas fait toutes les séquences
+            while id_seq < len(seq) or pointer < len(self.map[idx]):
+
+                # Check si un point d'origine est blown
+                if (is_inner_point(self.map[idx][pointer], circle) and
+                        self.map[idx][pointer - 1] not in registered_predecessors):
+
+                    # en def un prédécesseur
+                    registered_predecessors.append(self.map[idx][pointer - 1])
+                    registration = True
+
+                # Si on vient d'en trouver un, on enregistre les points et ajuste les suites
+                if registration:
+                    for insertion in range(len(seq[id_seq])):
+                        self.map[idx].insert(pointer, seq[id_seq][insertion])
+                    pointer += len(seq[id_seq])
+                    id_seq += 1
+                    registration = False
                 else:
-                    # if j >= len(tppolygone)-2:  # Every point are destroyed except 1 of them
-                    ...
+                    pointer += 1
+            if id_seq < len(seq) and pointer == len(self.map[idx]):
+                raise AssertionError("Shouldn't be here !!")
 
-        # Step 4 : Delete every over point inside the circle
+        # Step 4 : Delete every over point inside the circle Except newly incerted ones
         i = 0
         while i < len(self.map):
             j = 0
             form = self.map[i]
             while j < len(form):
-                if is_inner_point((form[j][0], form[j][1]), circle):
+                if (form[j][0], form[j][1]) not in circle and is_inner_point((form[j][0], form[j][1]), circle):
                     del form[j]
                 else:
                     j += 1
                 # On ne peut pas dessiner de polygone à moins de 3 côtés
-                # if len(form) < 3:
-                #    del self.map[i]
-
-        # Step 5 : Insert new points to self.map
-        ...
+                if len(form) < 3:
+                    del self.map[i]
 
     def create_polygones(self):
         """ Création de la map polygonale """
