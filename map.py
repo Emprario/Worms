@@ -6,7 +6,7 @@ La méthode de gestion des maps reste à déterminer
 """
 import pygame
 
-from CONSTS import MAP_KEYWORD, DEFAULT_DENSITY, coordinate
+from CONSTS import MAP_KEYWORD_REGISTRATION, MAP_KEYWORD_TEXTURE, DEFAULT_DENSITY, coordinate
 from physics import get_circle, is_inner_point
 from weapons import Weapon
 
@@ -17,10 +17,16 @@ class Map:
     def __init__(self, mappath: str, surface: pygame.Surface):
         """Chargement de la map dans un objet (chargement logique)."""
         self.map: list[list[coordinate]] = []
+        self.texture: str = ''
+        register_texture = False
         with open(mappath, "r") as file:
             for line in file:
-                if line == MAP_KEYWORD + '\n':
+                if register_texture:
+                    self.texture = line[:-1]
+                elif line == MAP_KEYWORD_REGISTRATION + '\n':
                     self.map.append([])
+                elif line == MAP_KEYWORD_TEXTURE + '\n':
+                    register_texture = True
                 elif line == '\n':
                     continue
                 else:
@@ -42,10 +48,8 @@ class Map:
             if len(self.map[i]) < 3:
                 raise ValueError(f'Map {i + 1} incomplète est composé que de {len(self.map[i])} éléments')
 
-        self.polygones: list[pygame.Rect] = []
         self.SURFACE: pygame.Surface = surface
-        self.combinatoire: dict[pygame.Rect, list[coordinate]] = {}
-        self.create_polygones()
+        # self.create_polygones()
 
     def destroy_map(self, impact: coordinate, weapon: Weapon):
         """
@@ -61,13 +65,13 @@ class Map:
         for i in range(len(self.map)):
             for point in circle:
                 if is_inner_point(point, self.map[i]):
-                    if tuple(self.map[i]) in inners:
+                    if i in inners:
                         inners[i][-1].append(point)
                     else:
                         inners[i] = [[point]]
-                else:
-                    if self.map[i] in inners:
-                        inners[i].append([])
+                # else:
+                #    if i in inners:
+                #        inners[i].append([])
 
         # Step 3 : contact points association + add point to self.map
         registered_predecessors: list[coordinate] = []
@@ -78,12 +82,11 @@ class Map:
             registration = False
 
             # Cherche tant qu'on n'a pas fait toutes les séquences
-            while id_seq < len(seq) or pointer < len(self.map[idx]):
+            while id_seq < len(seq) and pointer < len(self.map[idx]):
 
                 # Check si un point d'origine est blown
                 if (is_inner_point(self.map[idx][pointer], circle) and
                         self.map[idx][pointer - 1] not in registered_predecessors):
-
                     # en def un prédécesseur
                     registered_predecessors.append(self.map[idx][pointer - 1])
                     registration = True
@@ -105,48 +108,56 @@ class Map:
         while i < len(self.map):
             j = 0
             form = self.map[i]
+            # print(form)
             while j < len(form):
+                # print((form[j][0], form[j][1]), " <-in?->", is_inner_point((form[j][0], form[j][1]), circle),
+                #      "&& not part of circle ?", (form[j][0], form[j][1]) not in circle)
                 if (form[j][0], form[j][1]) not in circle and is_inner_point((form[j][0], form[j][1]), circle):
-                    del form[j]
+                    # print("Deleting :", i, j)
+                    del self.map[i][j]
                 else:
                     j += 1
-                # On ne peut pas dessiner de polygone à moins de 3 côtés
-                if len(form) < 3:
-                    del self.map[i]
+            # On ne peut pas dessiner de polygone à moins de 3 côtés
+            if len(form) < 3:
+                del self.map[i]
+            else:
+                i += 1
 
-    def create_polygones(self):
-        """ Création de la map polygonale """
+    # def create_polygones(self):
+    #    """ Création de la map polygonale """
+    #    for points in self.map:
+    #        pygame.draw.polygon(self.SURFACE, "white", points)
+
+    def print_map(self, highlight_points: bool = False):
+        """
+        Chargerment des images en mémoire pour affichage.
+        :param highlight_points: Permet d'afficher les points
+        """
         for points in self.map:
-            rect = pygame.draw.polygon(self.SURFACE, "white", points)
-            self.polygones.append(rect)
-            self.combinatoire[rect] = points
-
-    def print_map(self):
-        """Chargerment des images en mémoire pour affichage."""
-        pass
-
-
-class TriPixel:
-    """Element de base de la Map"""
-
-    def __init__(self, base_texture: str):
-        """
-        Chargement du Triangle Rectangle Pixel
-        :param base_texture: Chemin vers la texture de base du pixel
-        """
-        pass
-
-    def update_decoration(self):
-        """Se met à jour pour ajouter des textures supplémentaires au pixel"""
-        pass
-
-    def pg_flip(self):
-        """Pygame Filp : Fonction d'update spécifique au TriPixel"""
-        pass
+            pygame.draw.polygon(self.SURFACE, "darkblue", points)
+        if highlight_points:
+            for points in self.map:
+                for point in points:
+                    pygame.draw.circle(screen, (0, 255, 0), point, 5)
 
 
 if __name__ == "__main__":
-    print("Suite de test.")
-    mapobj = Map("./assets/map/dummy.map")
-    print(mapobj.map)
-    print(list(get_circle(DEFAULT_DENSITY, (0, 0), 10)))
+    SIZE = (1080, 920)
+
+    pygame.init()
+    screen = pygame.display.set_mode(SIZE)
+    pygame.display.set_caption("Test")
+    mapobj = Map("./assets/map/dummy.map", screen)
+
+    run = True
+    while run:
+        # print(pygame.mouse.get_pos())
+        pygame.draw.rect(screen, (0, 0, 0), pygame.Rect(0, 0, *SIZE))
+        mapobj.print_map(True)
+        pygame.display.flip()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                run = False
+            elif event.type == pygame.KEYDOWN:
+                mapobj.destroy_map((490, 157), Weapon(None))

@@ -9,7 +9,7 @@ class Weapon:
         Constructeur ...
         :param texture: Chemin vers la texture
         """
-        self.power = 10
+        self.power = 100
 
     def pg_flip(self):
         """Pygame Filp : Fonction d'update spécifique au worm"""

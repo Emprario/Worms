@@ -26,8 +26,8 @@ def get_circle(density: int, center: coordinate, radius: float) -> list[coordina
     """
     angles = [(2 * k * pi) / density for k in range(density)]
 
-    return zip([round(center[0] + radius * cos(angle), 4) for angle in angles],
-               [round(center[1] + radius * sin(angle), 4) for angle in angles])
+    return list(zip([round(center[0] + int(radius * cos(angle)), 4) for angle in angles],
+               [round(center[1] + int(radius * sin(angle)), 4) for angle in angles]))
 
 
 def is_inner_point(point: coordinate, polygon: list[coordinate]) -> bool:
