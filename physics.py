@@ -8,6 +8,7 @@ from math import pi, cos, sin, atan
 import pygame
 
 from CONSTS import coordinate, vector
+from debug import DEBUG_FLAG
 
 
 class BimBamBoum:
@@ -105,6 +106,7 @@ def get_full_line(ptA: coordinate, ptB: coordinate) -> list[coordinate]:
             y += 1
             correction -= 2 * (ptB[0] - ptA[0])
 
+    # Correct inversion
     if invert_x_y:
         for i in range(len(line)):
             line[i] = (line[i][1], line[i][0])
@@ -128,6 +130,7 @@ def is_inner_point(point: coordinate, polygon: list[coordinate]) -> bool:
     :param polygon: Tous les points des polygones
     :return: Si le point est dans le polygone
     """
+    if DEBUG_FLAG: print(f"\n\t====Analysing new point : {point} ====\n")
     inside = False
     # On prend les points deux à deux
     for i in range(len(polygon)):
@@ -135,29 +138,29 @@ def is_inner_point(point: coordinate, polygon: list[coordinate]) -> bool:
 
         # On place p1 à gauche de p2
         if p1[0] > p2[0]: p2, p1 = p1, p2
-        # print("P1={}, P2={} ...".format(p1, p2))
+        if DEBUG_FLAG: print("P1={}, P2={} ...".format(p1, p2))
 
         # Test si le point pourrait être dans le champ de la droite deux points (niveau y)
-        if min(p1[1], p2[1]) <= point[1] <= max(p1[1], p2[1]):
-            # print("In y range")
-            if p2[0] <= point[0]:
-                # print("Out in x range (no intersection)")
+        if min(p1[1], p2[1]) < point[1] <= max(p1[1], p2[1]):
+            if DEBUG_FLAG: print("In y range")
+            if p2[0] < point[0]:
+                if DEBUG_FLAG: print("Out in x range (no intersection)")
                 continue
             elif point[0] <= p1[0]:
-                # print("Out in x range (intersect segment)")
+                if DEBUG_FLAG: print("Out in x range (intersect segment)")
                 inside = not inside
             else:
-                # print("In x range")
+                if DEBUG_FLAG: print("In x range")
                 for pt in range(point[0], p2[0]):
                     rect = pygame.Rect(pt, point[1], 1, 1)
                     if rect.clipline((p1, p2)) != ():
-                        # print(f"Inverting {inside}->{not inside}")
+                        if DEBUG_FLAG: print(f"Inverting {inside}->{not inside}")
                         inside = not inside
                         break
         else:
-            # print("Out y range")
+            if DEBUG_FLAG: print("Out y range")
             continue
-    # print(f"Res={inside}")
+    if DEBUG_FLAG: print(f"Res={inside}")
     return inside
 
 

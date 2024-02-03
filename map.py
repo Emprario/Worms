@@ -9,6 +9,7 @@ import pygame
 from CONSTS import MAP_KEYWORD_REGISTRATION, MAP_KEYWORD_TEXTURE, DEFAULT_DENSITY, coordinate
 from physics import get_circle, is_inner_point
 from weapons import Weapon
+from debug import *
 
 
 class Map:
@@ -138,21 +139,16 @@ class Map:
         if highlight_points:
             for points in self.map:
                 for point in points:
-                    pygame.draw.circle(screen, (0, 255, 0), point, 5)
+                    pygame.draw.circle(self.SURFACE, (0, 255, 0), point, 5)
 
 
 if __name__ == "__main__":
-    SIZE = (1080, 920)
-
-    pygame.init()
-    screen = pygame.display.set_mode(SIZE)
-    pygame.display.set_caption("Test")
-    mapobj = Map("./assets/map/dummy.map", screen)
+    mapobj = Map("./assets/map/dummy.map", DEBUG_SCREEN)
 
     run = True
     while run:
         # print(pygame.mouse.get_pos())
-        pygame.draw.rect(screen, (0, 0, 0), pygame.Rect(0, 0, *SIZE))
+        clear_screen()
         mapobj.print_map(True)
         pygame.display.flip()
         for event in pygame.event.get():
