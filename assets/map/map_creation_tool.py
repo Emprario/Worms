@@ -86,5 +86,5 @@ if __name__ == "__main__":
 
     # AVERTISSEMENT
     for _ in range(10):
-        print("IL FAUT REMPLIR LES MAPS DANS LE SENS TRIGO OBLIGATOIREMENT !!!!!!!!!!!")
+        print("IL FAUT REMPLIR LES MAPS DANS LE SENS HORAIRE OBLIGATOIREMENT !!!!!!!!!!!")
     mainloop()
