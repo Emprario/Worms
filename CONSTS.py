@@ -13,4 +13,7 @@ MAP_KEYWORD_TEXTURE: str = "TEXTURE"
 
 DEFAULT_DENSITY: int = 20
 
+# Coordonnée X, Y
 coordinate = tuple[int, int]
+# Vecteur : Pt d'application, force, angle (rad)
+vector = tuple[tuple[int, int], float, float]
