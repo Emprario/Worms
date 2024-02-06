@@ -15,7 +15,7 @@ from debug import *
 class Map:
     """Représentation de la Map sous forme d'un objet"""
 
-    def __init__(self, mappath: str, surface: pygame.Surface):
+    def __init__(self, mappath: str):
         """Chargement de la map dans un objet (chargement logique)."""
         self.map: list[list[coordinate]] = []
         self.texture: str = ''
@@ -48,9 +48,6 @@ class Map:
         for i in range(len(self.map)):
             if len(self.map[i]) < 3:
                 raise ValueError(f'Map {i + 1} incomplète est composé que de {len(self.map[i])} éléments')
-
-        self.SURFACE: pygame.Surface = surface
-        # self.create_polygones()
 
     def destroy_map(self, impact: coordinate, weapon: Weapon):
         """
@@ -136,11 +133,11 @@ class Map:
         :param highlight_points: Permet d'afficher les points
         """
         for points in self.map:
-            pygame.draw.polygon(self.SURFACE, "darkblue", points)
+            pygame.draw.polygon(surface, "darkblue", points)
         if highlight_points:
             for points in self.map:
                 for point in points:
-                    pygame.draw.circle(self.SURFACE, (0, 255, 0), point, 5)
+                    pygame.draw.circle(surface, (0, 255, 0), point, 5)
 
     def pg_blit(self, surface: pygame.Surface):
         """Pygame Blit : Fonction d'affichage spécifique à la map"""
