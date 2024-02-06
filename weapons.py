@@ -11,8 +11,8 @@ class Weapon:
         """
         self.power = 100
 
-    def pg_flip(self):
-        """Pygame Filp : Fonction d'update spécifique au worm"""
+    def pg_blit(self):
+        """Pygame Blit : Fonction d'affichage spécifique au worm"""
         pass
 
 

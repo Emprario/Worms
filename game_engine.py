@@ -17,7 +17,7 @@ class GameEngine:
     def update_sprites(self, sprites: list[Sprite]):
         """
         Affichage des sprite (dans la boucle principale du jeu)
-        Utilise la méthode interne des sprites pour l'affichage graphique : pg_flip
+        Utilise la méthode interne des sprites pour l'affichage graphique : pg_blit
         :param sprites: liste des sprites à afficher
         """
         pass

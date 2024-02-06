@@ -129,9 +129,10 @@ class Map:
     #    for points in self.map:
     #        pygame.draw.polygon(self.SURFACE, "white", points)
 
-    def print_map(self, highlight_points: bool = False):
+    def print_map(self, surface: pygame.Surface, highlight_points: bool = False):
         """
-        Chargerment des images en mémoire pour affichage.
+        Chargerment de la map avec des couleurs vives, les points peuvent être affichés ! (Débogage)
+        :param surface: surface sur lequel afficher
         :param highlight_points: Permet d'afficher les points
         """
         for points in self.map:
@@ -140,6 +141,10 @@ class Map:
             for points in self.map:
                 for point in points:
                     pygame.draw.circle(self.SURFACE, (0, 255, 0), point, 5)
+
+    def pg_blit(self, surface: pygame.Surface):
+        """Pygame Blit : Fonction d'affichage spécifique à la map"""
+        pass
 
 
 if __name__ == "__main__":
