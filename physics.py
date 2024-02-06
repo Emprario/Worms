@@ -11,11 +11,6 @@ from CONSTS import coordinate, vector
 from debug import DEBUG_FLAG
 
 
-class BimBamBoum:
-    """Moteur physique du jeu"""
-    pass
-
-
 def get_circle(density: int, center: coordinate, radius: float) -> list[coordinate]:
     """
     Renvoie une liste de coordonée en forme de cercle,
