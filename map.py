@@ -121,11 +121,6 @@ class Map:
             else:
                 i += 1
 
-    # def create_polygones(self):
-    #    """ Création de la map polygonale """
-    #    for points in self.map:
-    #        pygame.draw.polygon(self.SURFACE, "white", points)
-
     def print_map(self, surface: pygame.Surface, highlight_points: bool = False):
         """
         Chargerment de la map avec des couleurs vives, les points peuvent être affichés ! (Débogage)
@@ -145,13 +140,13 @@ class Map:
 
 
 if __name__ == "__main__":
-    mapobj = Map("./assets/map/dummy.map", DEBUG_SCREEN)
+    mapobj = Map("./assets/map/dummy.map")
 
     run = True
     while run:
         # print(pygame.mouse.get_pos())
         clear_screen()
-        mapobj.print_map(True)
+        mapobj.print_map(DEBUG_SCREEN, True)
         pygame.display.flip()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
