@@ -136,7 +136,20 @@ class Map:
 
     def pg_blit(self, surface: pygame.Surface):
         """Pygame Blit : Fonction d'affichage spécifique à la map"""
-        pass
+        # Crée l'image
+        ld_texture = pygame.image.load(self.texture).convert_alpha()
+
+        # Crée la surface de polygones
+        mask_surface = pygame.Surface(surface.get_size())
+        for points in self.map:
+            pygame.draw.polygon(mask_surface, "white", points)
+
+        # Imprime EN multipliant la couleur des pixels (i.e. en restant assez fidèle) :
+        # Reference : https://github.com/pygame/pygame/blob/main/src_c/surface.h#L247
+        ld_texture.blit(mask_surface, (0, 0), None, pygame.BLEND_RGBA_MULT)
+        # Cette texture modifiée est blit
+        surface.blit(ld_texture, (0, 0))
+
 
 
 if __name__ == "__main__":
@@ -146,7 +159,8 @@ if __name__ == "__main__":
     while run:
         # print(pygame.mouse.get_pos())
         clear_screen()
-        mapobj.print_map(DEBUG_SCREEN, True)
+        #mapobj.print_map(DEBUG_SCREEN, True)
+        mapobj.pg_blit(DEBUG_SCREEN)
         pygame.display.flip()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
