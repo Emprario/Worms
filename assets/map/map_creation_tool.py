@@ -83,4 +83,8 @@ if __name__ == "__main__":
 
     points: list[tuple[pygame.surface, tuple[int, int]]] = []
     registered_points_list: list[list[tuple[pygame.surface, tuple[int, int]]]] = [[]]
+
+    # AVERTISSEMENT
+    for _ in range(10):
+        print("IL FAUT REMPLIR LES MAPS DANS LE SENS HORAIRE OBLIGATOIREMENT !!!!!!!!!!!")
     mainloop()

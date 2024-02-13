@@ -5,5 +5,15 @@ Merci de mettre des hints sur les constantes dans le programme afin de faciliter
 """
 
 VERSION: str = "earlybuilds"
+
 SIZE: tuple[int, int] = (1080, 720)
-MAP_KEYWORD: str = "STARTSTOP"
+
+MAP_KEYWORD_REGISTRATION: str = "STARTSTOP"
+MAP_KEYWORD_TEXTURE: str = "TEXTURE"
+
+DEFAULT_DENSITY: int = 20
+
+# Coordonnée X, Y
+coordinate = tuple[int, int]
+# Vecteur : Pt d'application, force, angle (rad)
+vector = tuple[tuple[int, int], float, float]

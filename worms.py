@@ -2,6 +2,8 @@
 Gestions des worms
     - Sous forme de Sprite ?
 """
+import pygame
+
 
 class Worm:
     """Classe du ver de terre"""
@@ -13,6 +15,6 @@ class Worm:
         """
         pass
 
-    def pg_flip(self):
-        """Pygame Filp : Fonction d'update spécifique au worm"""
+    def pg_blit(self, surface: pygame.Surface):
+        """Pygame Blit : Fonction d'affichage spécifique au worm"""
         pass
