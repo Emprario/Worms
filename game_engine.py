@@ -33,8 +33,3 @@ class GameEngine:
     def events(self):
         """Gestion des events pygame (ce n'est pas la boucle principale)"""
         pass
-
-
-class MaitreDuJeu:
-    """Se charge de la gestion du gameplay"""
-    pass
