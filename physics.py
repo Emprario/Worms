@@ -115,7 +115,7 @@ def does_intersect(point: coordinate, line: tuple[coordinate, coordinate]) -> bo
     :param line: Ligne
     :return: True Si Point \in Ligne
     """
-    pass
+    return point in line
 
 
 def is_inner_point(point: coordinate, polygon: list[coordinate]) -> bool:
