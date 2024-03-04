@@ -6,7 +6,7 @@ import pygame
 #       CONSTS Wrapper       #
 ##############################
 
-SIZE: tuple[int, int] = (1920, 1080)
+SIZE: tuple[int, int] = (1080, 720)
 MAP_KEYWORD: str = "STARTSTOP"
 
 
@@ -88,4 +88,3 @@ if __name__ == "__main__":
     for _ in range(10):
         print("IL FAUT REMPLIR LES MAPS DANS LE SENS HORAIRE OBLIGATOIREMENT !!!!!!!!!!!")
     mainloop()
-    MAP_FILE = "./dummy.map"

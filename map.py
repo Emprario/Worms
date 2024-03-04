@@ -17,7 +17,7 @@ class Map:
 
     def __init__(self, mappath: str):
         """Chargement de la map dans un objet (chargement logique)."""
-        self.map: list[list[coordinate]] = []
+        self.map: list[list[coordinate]] = [] # coordinate : tuple (int,int); then list(coordinate) liste of tuples for a polygon; then list of all of em
         self.texture: str = ''
         register_texture = False
         with open(mappath, "r") as file:
