@@ -3,27 +3,9 @@ Gestions des worms
     - Sous forme de Sprite ?
 """
 import pygame
-from map import Map
 
 
-class Entity:
-    map_obj = None
-
-    def __init__(self, map: Map = None):
-        if map is not None:
-            self.map_obj = map
-
-    def meth1(self):
-        pass
-
-    def move_worm_check(self):
-        """
-
-        """
-
-
-
-class Worm(Entity):
+class Worm:
     """Classe du ver de terre"""
 
     def __init__(self, camp: int, x: int, y: int, hp=100):
@@ -31,7 +13,6 @@ class Worm(Entity):
         Constructeur de Worm
         :param camp: Camp du worm (pas nécessairement binaire)
         """
-        super().__init__()
         self.team = camp # L'équipe du worm
         self.x_coord = x
         self.y_coord = y
@@ -43,7 +24,6 @@ class Worm(Entity):
         self.jump_height = 80 # La hauteur maximale d'un saut
         self.movement_distance = 200 # NOT THE FINAL VALUE SUBJECT TO CHANGE
         self.movement_speed = 40 # SUBJECT TO CHANGE
-        self.meth1()
 
     def move_worm(self, x_axis, y_axis):
         """

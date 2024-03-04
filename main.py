@@ -7,7 +7,7 @@ import pygame
 import sys
 from CONSTS import VERSION
 from map import Map
-from worms import Entity
+from entity import  Entity
 
 if __name__ == "__main__":
     print(f"Wormy version: {VERSION}")
