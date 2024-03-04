@@ -16,16 +16,16 @@ if __name__ == "__main__":
 pygame.init()
 
 # Set up the screen
-screen_width = 1700
-screen_height = 900
+screen_width = 1080
+screen_height = 720
 screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption("My Game")
 
-# Set up colors
+# Set up color
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 
-mapobj = Map("dummy")
+mapobj = Map("assets/map/dummy.map")
 Entity(mapobj)
 
 
@@ -41,6 +41,7 @@ while running:
 
     # Render (draw)
     screen.fill(WHITE)
+    mapobj.print_map(screen)
 
     # Update the display
     pygame.display.flip()
