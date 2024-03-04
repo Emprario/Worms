@@ -8,6 +8,7 @@ import sys
 from CONSTS import VERSION
 from map import Map
 from entity import  Entity
+from worms import Worm
 
 if __name__ == "__main__":
     print(f"Wormy version: {VERSION}")
@@ -28,6 +29,8 @@ WHITE = (255, 255, 255)
 mapobj = Map("assets/map/dummy.map")
 Entity(mapobj)
 
+player = Worm(0,50,50)
+
 
 # Main game loop
 running = True
@@ -37,11 +40,19 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_LEFT]:
+        player.move_worm(-1,0)
+    if keys[pygame.K_RIGHT]:
+        player.move_worm(1,0)
+
+
     # Game logic (update)
 
     # Render (draw)
     screen.fill(WHITE)
     mapobj.print_map(screen)
+    player.draw(screen)
 
     # Update the display
     pygame.display.flip()

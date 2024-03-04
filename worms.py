@@ -24,6 +24,7 @@ class Worm:
         self.jump_height = 80 # La hauteur maximale d'un saut
         self.movement_distance = 200 # NOT THE FINAL VALUE SUBJECT TO CHANGE
         self.movement_speed = 40 # SUBJECT TO CHANGE
+        self.image = pygame.image.load("assets/worms/worm_sprite.png").convert_alpha()
 
     def move_worm(self, x_axis, y_axis):
         """
@@ -68,6 +69,8 @@ class Worm:
                 self.jump_current = self.jump_height
                 self.is_on_ground = True
 
+    def draw(self, screen):
+        screen.blit(,self.image)
 
 
 
