@@ -59,17 +59,41 @@ class Map:
         circle = get_circle(DEFAULT_DENSITY, impact, weapon.power)
 
         # Step 2 : Get sequences of inner point
-        inners: dict[int, list[list[coordinate]]] = {}  # Index <- seq of points
-        for i in range(len(self.map)):
-            for point in circle:
+        inners: dict[int, list[list[coordinate]]] = {}  # Index of polygon <- seq of points
+        continuation = False
+        placed = []  # indicate if a point was placed somewhere and where
+        for point in circle:
+            for i in range(len(self.map)):
                 if is_inner_point(point, self.map[i]):
-                    if i in inners:
+                    if i in inners and continuation:
                         inners[i][-1].append(point)
-                    else:
+                    elif i in inners and not continuation:
+                        inners[i].append([point])
+                    elif i not in inners and continuation:
                         inners[i] = [[point]]
-                # else:
-                #    if i in inners:
-                #        inners[i].append([])
+                    else:  # i not in inners and not continuation
+                        inners[i] = [[point]]
+                    continuation = True
+                    placed.append(i)
+
+                    break
+            else:
+                placed.append(-1)
+                continuation = False
+
+        # Update last list to eventually connect to it
+        if placed[0] != -1 and placed[-1] != -1:
+            copy: list[coordinate] = []
+            for nend in range(len(inners[placed[-1]])):
+                if circle[0] in inners[placed[0]][nend]:
+                    copy = inners[placed[0]][nend]
+                    del inners[placed[0]][nend]
+                    break
+            for nstart in range(len(inners[placed[-1]])):
+                if circle[-1] in inners[placed[-1]][nstart]:
+                    inners[placed[0]][nstart].extend(copy)
+                    break
+
 
         # Step 3 : contact points association + add point to self.map
         registered_predecessors: list[coordinate] = []
@@ -149,7 +173,6 @@ class Map:
         ld_texture.blit(mask_surface, (0, 0), None, pygame.BLEND_RGBA_MULT)
         # Cette texture modifiée est blit
         surface.blit(ld_texture, (0, 0))
-
 
 
 if __name__ == "__main__":
