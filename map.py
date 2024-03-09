@@ -145,7 +145,7 @@ class Map:
             else:
                 i += 1
 
-    def print_map(self, surface: pygame.Surface, highlight_points: bool = False):
+    def print_map(self, surface: pygame.Surface, *, highlight_points: bool = False):
         """
         Chargerment de la map avec des couleurs vives, les points peuvent être affichés ! (Débogage)
         :param surface: surface sur lequel afficher
