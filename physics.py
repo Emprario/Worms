@@ -4,6 +4,7 @@ Gestion de la physique pure
     - PAS DE CONSTANTES (cf. CONSTS.py)
 """
 from math import pi, cos, sin, atan
+
 from CONSTS import coordinate, vector
 from debug import DEBUG_FLAG
 
@@ -107,15 +108,14 @@ def get_full_line(ptA: coordinate, ptB: coordinate) -> list[coordinate]:
     return line
 
 
-def does_intersect(point: coordinate, line: tuple[coordinate, coordinate]) -> bool:
+def does_intersect(lineA: tuple[coordinate, coordinate], lineB: tuple[coordinate, coordinate]) -> bool:
     """
     Défini si un point et une ligne s'intersectent dans une ligne de 0 rad
-    :param point: Point
-    :param line: Ligne
-    :return: True Si Point \in Ligne
+    :param lineA: Ligne
+    :param lineB: Ligne
+    :return: True Si Il y a Croisement
     """
-    full_line = {pt[1]: pt[0] for pt in get_full_line(*line)}
-    return point[0] < full_line[point[1]]
+    return len(set(get_full_line(*lineA)) & set(get_full_line(*lineB))) > 0
 
 
 def is_inner_point(point: coordinate, polygon: list[coordinate]) -> bool:
@@ -146,7 +146,7 @@ def is_inner_point(point: coordinate, polygon: list[coordinate]) -> bool:
                 inside = not inside
             else:
                 if DEBUG_FLAG: print("In x range")
-                if does_intersect(point, (p1, p2)):
+                if does_intersect((*point, (p2[0], point[1])), (p1, p2)):
                     if DEBUG_FLAG: print(f"Inverting {inside}->{not inside}")
                     inside = not inside
                     break
