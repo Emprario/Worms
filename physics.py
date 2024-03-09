@@ -4,9 +4,6 @@ Gestion de la physique pure
     - PAS DE CONSTANTES (cf. CONSTS.py)
 """
 from math import pi, cos, sin, atan
-
-import pygame
-
 from CONSTS import coordinate, vector
 from debug import DEBUG_FLAG
 
@@ -71,16 +68,17 @@ def get_full_line(ptA: coordinate, ptB: coordinate) -> list[coordinate]:
     """
     # Use the bresenham algorithm
     # Reference : https://fr.wikipedia.org/wiki/Algorithme_de_trac%C3%A9_de_segment_de_Bresenham
-    # Reference : https://www.geeksforgeeks.org/bresenhams-line-generation-algorithm/
+    # Reference : https://babavoss.pythonanywhere.com/python/bresenham-line-drawing-algorithm-implemented-in-py
 
     # Fit the input into the algorithm:
     if ptA[0] > ptB[0]:
         ptA, ptB = ptB, ptA
-    print(ptA, ptB)
+    # print(ptA, ptB)
 
     dx = ptB[0] - ptA[0]
-    dy = ptB[1] - ptA[1]
+    dy = abs(ptB[1] - ptA[1])
     if dx < dy:
+        dy, dx = dx, dy
         invert_x_y = True
         ptA = (ptA[1], ptA[0])
         ptB = (ptB[1], ptB[0])
@@ -88,18 +86,19 @@ def get_full_line(ptA: coordinate, ptB: coordinate) -> list[coordinate]:
         invert_x_y = False
 
     # Bresenham algorithm
-    line = []
-    m = 2 * (ptB[1] - ptA[1])
-    correction = m - (ptB[0] - ptA[0])
 
-    y = ptA[1]
-    for x in range(ptA[0], ptB[0] + 1):
+    x, y = ptA
+    pente = 2 * dy - dx
+    line = [(x, y)]
+
+    for k in range(2, dx + 2):
+        if pente > 0:
+            y = y + 1 if y < ptB[1] else y - 1
+            pente = pente + 2 * (dy - dx)
+        else:
+            pente = pente + 2 * dy
+        x = x + 1 if x < ptB[0] else x - 1
         line.append((x, y))
-        correction += m
-
-        if correction >= 0:
-            y += 1
-            correction -= 2 * (ptB[0] - ptA[0])
 
     # Correct inversion
     if invert_x_y:
@@ -110,12 +109,13 @@ def get_full_line(ptA: coordinate, ptB: coordinate) -> list[coordinate]:
 
 def does_intersect(point: coordinate, line: tuple[coordinate, coordinate]) -> bool:
     """
-    Défini si un point et une ligne s'intersectent
+    Défini si un point et une ligne s'intersectent dans une ligne de 0 rad
     :param point: Point
     :param line: Ligne
     :return: True Si Point \in Ligne
     """
-    pass
+    full_line = {pt[1]: pt[0] for pt in get_full_line(*line)}
+    return point[0] < full_line[point[1]]
 
 
 def is_inner_point(point: coordinate, polygon: list[coordinate]) -> bool:
@@ -146,12 +146,10 @@ def is_inner_point(point: coordinate, polygon: list[coordinate]) -> bool:
                 inside = not inside
             else:
                 if DEBUG_FLAG: print("In x range")
-                for pt in range(point[0], p2[0]):
-                    rect = pygame.Rect(pt, point[1], 1, 1)
-                    if rect.clipline((p1, p2)) != ():
-                        if DEBUG_FLAG: print(f"Inverting {inside}->{not inside}")
-                        inside = not inside
-                        break
+                if does_intersect(point, (p1, p2)):
+                    if DEBUG_FLAG: print(f"Inverting {inside}->{not inside}")
+                    inside = not inside
+                    break
         else:
             if DEBUG_FLAG: print("Out y range")
             continue
@@ -160,7 +158,7 @@ def is_inner_point(point: coordinate, polygon: list[coordinate]) -> bool:
 
 
 if __name__ == '__main__':
-    pts = [(3, 2), (15, 5)]
+    pts = [(331, 240), (396, 237)]
     print(get_full_line(*pts))
     pts = [(5, 15), (2, 3)]  # Inversion
     print(get_full_line(*pts))
