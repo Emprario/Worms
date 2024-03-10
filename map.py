@@ -4,12 +4,13 @@ La méthode de gestion des maps reste à déterminer
     - Comment la charger depuis un fichier externe (assets/map/??.map)
     - Comment représenter dans le programme de la matière
 """
-import pygame
+
+from random import randint
 
 from CONSTS import MAP_KEYWORD_REGISTRATION, MAP_KEYWORD_TEXTURE, DEFAULT_DENSITY, coordinate
-from physics import get_circle, is_inner_point
-from weapons import Weapon
 from debug import *
+from physics import get_circle, is_inner_point, does_intersect
+from weapons import Weapon
 
 
 class Map:
@@ -17,7 +18,8 @@ class Map:
 
     def __init__(self, mappath: str):
         """Chargement de la map dans un objet (chargement logique)."""
-        self.map: list[list[coordinate]] = [] # coordinate : tuple (int,int); then list(coordinate) liste of tuples for a polygon; then list of all of em
+        self.map: list[list[
+            coordinate]] = []  # coordinate : tuple (int,int); then list(coordinate) liste of tuples for a polygon; then list of all of em
         self.texture: str = ''
         register_texture = False
         with open(mappath, "r") as file:
@@ -59,19 +61,38 @@ class Map:
         circle = get_circle(DEFAULT_DENSITY, impact, weapon.power)
 
         # Step 2 : Get sequences of inner point
-        inners: dict[int, list[list[coordinate]]] = {}  # Index of polygon <- seq of points
+        # two tuple of two breakpoints <- seq of points
+        inners: dict[tuple[tuple[coordinate, coordinate], tuple[coordinate, coordinate]], list[coordinate]] = {}
         continuation = False
-        placed = []  # indicate if a point was placed somewhere and where
-        for point in circle:
-            for i in range(len(self.map)):
-                if is_inner_point(point, self.map[i]):
+        buffkey: tuple[coordinate, coordinate] = None
+        buffer: list[coordinate] = []
+        for form in self.map:
+            for ptidx in range(len(circle)):
+                if is_inner_point(circle[ptidx], form):
+                    # Catch if we are already registering ...
+                    if continuation:
+                        buffer.append(circle[ptidx])
+                    # Check if it's not the first point
+                    elif ptidx > 0 and not continuation:
+                        continuation = True
+                        for formptidx in range(len(form)):
+                            if does_intersect(
+                                    (circle[ptidx - 1], circle[ptidx]),
+                                    (form[formptidx - 1], form[formptidx])
+                            ):
+                                buffkey = (form[formptidx - 1], form[formptidx])
+                                break
+                        inners[buffkey] = [circle[ptidx]]
+                    elif not continuation:
+                        pass
+
+        """        
+                if is_inner_point(point, form):
                     if i in inners and continuation:
                         inners[i][-1].append(point)
                     elif i in inners and not continuation:
                         inners[i].append([point])
-                    elif i not in inners and continuation:
-                        inners[i] = [[point]]
-                    else:  # i not in inners and not continuation
+                    else:  # i not in inners
                         inners[i] = [[point]]
                     continuation = True
                     placed.append(i)
@@ -93,40 +114,60 @@ class Map:
                 if circle[-1] in inners[placed[-1]][nstart]:
                     inners[placed[0]][nstart].extend(copy)
                     break
+        """
 
+        # Two sequences of points in a same key means it should be divided into two diff polygones
 
         # Step 3 : contact points association + add point to self.map
         registered_predecessors: list[coordinate] = []
         # Parcours à la fois les listes à insérer et lindex du polygone dans self.map
-        for idx, seq in inners.items():
-            pointer = 0
+        for idx, all_seqs in inners.items():
+            pointer: int = 0
             id_seq = 0
-            registration = False
 
             # Cherche tant qu'on n'a pas fait toutes les séquences
-            while id_seq < len(seq) and pointer < len(self.map[idx]):
+            while id_seq < len(all_seqs) and pointer < len(self.map[idx]):
 
                 # Check si un point d'origine est blown
-                if (is_inner_point(self.map[idx][pointer], circle) and
-                        self.map[idx][pointer - 1] not in registered_predecessors):
+                if (
+                        is_inner_point(self.map[idx][pointer], circle) and
+                        # self.map[idx][pointer - 1] not in registered_predecessors and
+                        not is_inner_point(self.map[idx][pointer - 1], circle)
+                ):
                     # en def un prédécesseur
-                    registered_predecessors.append(self.map[idx][pointer - 1])
-                    registration = True
+                    del self.map[idx][pointer]
+                    registered_predecessors.append(self.map[idx][pointer])
 
-                # Si on vient d'en trouver un, on enregistre les points et ajuste les suites
-                if registration:
-                    for insertion in range(len(seq[id_seq])):
-                        self.map[idx].insert(pointer, seq[id_seq][insertion])
-                    pointer += len(seq[id_seq])
+                    # on enregistre les points et ajuste les suites
+                    for idx_insertion in range(len(all_seqs[id_seq])):
+                        self.map[idx].insert(pointer, all_seqs[id_seq][idx_insertion])
+                    pointer += len(all_seqs[id_seq])
                     id_seq += 1
-                    registration = False
+                elif is_inner_point(self.map[idx][pointer], circle):
+                    del self.map[idx][pointer]
                 else:
                     pointer += 1
-            if id_seq < len(seq) and pointer == len(self.map[idx]):
+            if id_seq < len(all_seqs) and pointer == len(self.map[idx]):
                 raise AssertionError("Shouldn't be here !!")
 
+        # Check seq of points
+        sq = dict()
+        dmrun = True
+        while dmrun:
+            for all_seq_point in inners.values():
+                for seq_point in all_seq_point:
+                    if tuple(seq_point) not in sq:
+                        sq[tuple(seq_point)] = (randint(0, 255), randint(0, 255), randint(0, 255))
+                    for point in seq_point:
+                        pygame.draw.circle(DEBUG_SCREEN, sq[tuple(seq_point)], point, 5)
+                pygame.display.flip()
+
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    dmrun = False
+
         # Step 4 : Delete every over point inside the circle Except newly incerted ones
-        i = 0
+        """i = 0
         while i < len(self.map):
             j = 0
             form = self.map[i]
@@ -143,7 +184,7 @@ class Map:
             if len(form) < 3:
                 del self.map[i]
             else:
-                i += 1
+                i += 1"""
 
     def print_map(self, surface: pygame.Surface, *, highlight_points: bool = False):
         """
@@ -182,7 +223,7 @@ if __name__ == "__main__":
     while run:
         # print(pygame.mouse.get_pos())
         clear_screen()
-        #mapobj.print_map(DEBUG_SCREEN, True)
+        # mapobj.print_map(DEBUG_SCREEN, True)
         mapobj.pg_blit(DEBUG_SCREEN)
         pygame.display.flip()
         for event in pygame.event.get():
