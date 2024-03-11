@@ -3,6 +3,7 @@ Gestions des worms
     - Sous forme de Sprite ?
 """
 import pygame
+from physics import get_angle, get_dist, get_full_line
 
 
 class Worm:
@@ -35,9 +36,21 @@ class Worm:
         self.x_coord += x_axis
         self.y_coord += y_axis
 
+        # NEW IDEA FOR WORM MOVEMENT:
+        """
+        Move the x axis however but to make sure that we don't walk through the map,
+        we use the get_full_line and use all the coordinates grabbed from it.
+        When moving left or right, we constantly check
+        """
 
+        distance_travelled = 0
 
-
+    def get_surrounding_points(self):
+        """
+        À partir des coordonnées du joueur, détermine le point
+        le plus proche à sa gauche et à sa droite
+        :return: List
+        """
 
 
 
@@ -70,7 +83,7 @@ class Worm:
                 self.is_on_ground = True
 
     def draw(self, screen):
-        screen.blit(,self.image)
+        screen.blit(self.image,(self.x_coord,self.y_coord))
 
 
 

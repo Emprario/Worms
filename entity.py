@@ -27,6 +27,13 @@ class Entity:
                 new_line = get_full_line(self.map_obj.map[i][j], self.map_obj.map[i][j+1])
                 print(new_line)
 
+    def check_y_coord(self, y_position):
+        """
+
+        """
+
+
+
 
 
 mappp = Map("assets/map/dummy.map")
