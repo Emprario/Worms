@@ -1,4 +1,4 @@
-# DEPRECATED REPO
+# DEPRECATED BRANCH
 
 Check master branch at :
 
