@@ -1,0 +1,4 @@
+# PalaVect2
+*By The Lethal Group*
+
+PalaVect2 est est un [Worms-like](https://www.codecmoments.com/wp-content/uploads/2023/04/Worm-WMD-Mobilize-03.png). C'est un jeu multijoueur en local dont le but est de tuer les vers adverses.Dans ce jeu s'affronte des vers, sur une carte en 2D (axes X et Hauteur), à l'aide de différentes armes (au corps à corps, des fusils, des grenades) qui au file de la partie détruiront la carte (par explosion). Pour la partie physique sera impliqué la gravité qui sera appliqué à la fois au vers (chute lorsqu’il saute dans le vide par exemple) mais également aux armes : trajectoire d'une balle de fusil ou d'une grenade et plus généralement de tout les munitions des armes qui possède donc une masse et une vitesse. Sera *éventuellement* étudié une force extérieur qui vient perturber les interactions : le vent. Il pourra pousser les munitions en appliquant une deuxième force.
