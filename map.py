@@ -300,7 +300,7 @@ class TileMap:
         for x in range(self.dimensions[0]):
             for y in range(self.dimensions[1]):
                 if skelmap[x][y]:
-                    MAP_SCREEN.set_at((x, y), "red")
+                    screen.set_at((x, y), "red")
 
 
     def destroy_map(self, impact: coordinate, power:float):
