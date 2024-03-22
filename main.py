@@ -10,7 +10,7 @@ from map import TileMap
 
 pygame.init()
 
-path = "assets/map/01.map"
+path = "assets/map/03.map"
 map = TileMap(path)
 
 SCREEN = pygame.display.set_mode(map.dimensions)
@@ -24,6 +24,8 @@ while run:
     for event in pygame.event.get():
         if event.type == pygame.KEYDOWN:
             run = False
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            print("Mouse point @", pygame.mouse.get_pos())
         elif event.type == pygame.QUIT:
             pygame.quit()
             exit(1)
