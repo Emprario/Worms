@@ -12,3 +12,4 @@ class OnLoadMapError(Exception):
 # Constantes
 
 coordinate = tuple[int, int]
+DEFAULT_DENSITY = 20
