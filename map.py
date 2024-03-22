@@ -277,31 +277,16 @@ class TileMap:
                             self.map[x][y] = inside
 
 
-    def print_map(self, skelmap: list[list[bool]]):
+    def print_map(self, skelmap: list[list[bool]], screen):
         """
         Affiche la map dans un écran à part
         Utilité pour le débugage
         :param skelmap: La map à afficher
         """
-        import pygame
-        SIZE = self.dimensions
-
-        pygame.init()
-        MAP_SCREEN = pygame.display.set_mode(SIZE)
-        pygame.display.set_caption("Debug screen")
         for x in range(self.dimensions[0]):
             for y in range(self.dimensions[1]):
                 if skelmap[x][y]:
-                    MAP_SCREEN.set_at((x, y), "red")
-        pygame.display.flip()
-        run = True
-        while run:
-            for event in pygame.event.get():
-                if event.type == pygame.KEYDOWN:
-                    run = False
-                elif event.type == pygame.QUIT:
-                    pygame.quit()
-                    exit(1)
+                    screen.set_at((x, y), "red")
 
 
 if __name__ == "__main__":
