@@ -17,6 +17,8 @@ SCREEN = pygame.display.set_mode(map.dimensions)
 
 pygame.display.set_caption("PalaVect2")
 
+map.destroy_map((391, 72), 50.0)
+
 run = True
 while run:
     map.print_map(map.map, SCREEN)

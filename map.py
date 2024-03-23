@@ -7,6 +7,11 @@ Méthode de gestion de map : tilemap
 
 from CONSTS import coordinate, OnLoadMapError, DEFAULT_DENSITY
 from utils import get_full_line, get_circle
+#from debug_pygame import show_point
+from sys import setrecursionlimit
+
+
+setrecursionlimit(9000)
 
 
 def load_from_file(mappath: str, dimensions: list[int]) -> tuple[str, list[list[coordinate]]]:
@@ -117,13 +122,13 @@ def gen_segmented_map(vectmap: list[list[coordinate]]) -> list[list[coordinate]]
 def algo_peinture(segmap: list[list[coordinate]], fmap: list[list[bool]], centers: list[coordinate], base: bool = False):
 
     def fill_neighbours(point: coordinate, segform: set[coordinate]):
-        if point in segform:
-            fmap[point[0]][point[1]] = not base
-        elif fmap[point[0]][point[1]] == base:
-            fmap[point[0]][point[1]] = not base
-            for (x,y) in [(1, 0), (0, 1), (-1, 0), (0, -1)]:
-                fill_neighbours(point[0]+x, point[1]+y)
+        # print(segform)
+        fmap[point[0]][point[1]] = not base
+        for (x,y) in [(1, 0), (0, 1), (-1, 0), (0, -1)]:
+            if (point not in segform) and fmap[point[0]+x][point[1]+y] == base:
+                fill_neighbours((point[0]+x, point[1]+y), segform)
 
+    # print(centers)
     for i in range(len(centers)):
         fill_neighbours(centers[i], set(segmap[i])) 
 
@@ -306,10 +311,15 @@ class TileMap:
     def destroy_map(self, impact: coordinate, power:float):
         seg_circle = gen_segmented_map([get_circle(DEFAULT_DENSITY, impact, power)])
         
-        onmap = [[True for y in range(len(self.map))] for x in range(len(self.map[0]))]
+        # for point in seg_circle[0]:
+        #     show_point(point, does_stop=False, one_pixel=True)
+        # show_point(impact, color=(0,0,255))
+
+        onmap = [[True for y in range(len(self.map[x]))] for x in range(len(self.map))]
+
         algo_peinture(seg_circle, onmap, [impact], base=True)
 
-        self.map = [[self.map and onmap for y in range(len(self.map[x]))] for x in range(len(self.map))]
+        self.map = [[self.map[x][y] and onmap[x][y] for y in range(len(self.map[x]))] for x in range(len(self.map))]
 
 
 if __name__ == "__main__":
