@@ -11,7 +11,7 @@ from utils import get_full_line, get_circle
 from sys import setrecursionlimit
 
 
-setrecursionlimit(9000)
+setrecursionlimit(90000000)
 
 
 def load_from_file(mappath: str, dimensions: list[int]) -> tuple[str, list[list[coordinate]]]:
@@ -144,6 +144,7 @@ class TileMap:
         self.map: list[list[bool]] = []
         self.texture: str | None = None  # Invalid texture is None // "notprovided" is for debug texture
         self.dimensions: list[int] = [0, 0]
+        self.form_borders: list[list[coordinate]] = []
 
         # Step 1: Extract vectorial map
 
@@ -157,7 +158,7 @@ class TileMap:
 
         # Step2: Obtain segmented map
 
-        segmap: list[list[coordinate]] = gen_segmented_map(vectmap)
+        self.form_borders: list[list[coordinate]] = gen_segmented_map(vectmap)
 
         # more = {point for lstpoint in segmap for point in lstpoint}
         # skelmap = [[(x,y) in more for y in range(self.dimensions[1])] for x in range(self.dimensions[0])]
@@ -177,7 +178,7 @@ class TileMap:
             [False for _ in range(self.dimensions[1])] for _ in range(self.dimensions[0])
         ]
 
-        for form in segmap:
+        for form in self.form_borders:
 
             # Step 3.1 Order points by x then y in a dict
             # it's a set because 'in' operator in set is O(1) in python same for dicts
@@ -306,9 +307,18 @@ class TileMap:
             for y in range(self.dimensions[1]):
                 if skelmap[x][y]:
                     screen.set_at((x, y), "red")
+                else:
+                    screen.set_at((x, y), "black")
 
 
     def destroy_map(self, impact: coordinate, power:float):
+        """
+        Destoy the map using an impact point and the power of the weapon
+        i.e. it's modifying the self.map var
+        :param impact: coordoniate of the point of the center of the impact
+        :param power: the power of the weapon which is the radius of the impact
+        """
+        
         seg_circle = gen_segmented_map([get_circle(DEFAULT_DENSITY, impact, power)])
         
         # for point in seg_circle[0]:
@@ -320,6 +330,14 @@ class TileMap:
         algo_peinture(seg_circle, onmap, [impact], base=True)
 
         self.map = [[self.map[x][y] and onmap[x][y] for y in range(len(self.map[x]))] for x in range(len(self.map))]
+
+
+    def update_contour(self):
+        """
+        
+        """
+        # self.form_borders
+        pass
 
 
 if __name__ == "__main__":
