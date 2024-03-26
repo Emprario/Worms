@@ -10,7 +10,7 @@ from map import TileMap
 
 pygame.init()
 
-path = "assets/map/03.map"
+path = "assets/map/01.map"
 map = TileMap(path)
 
 SCREEN = pygame.display.set_mode(map.dimensions)
