@@ -7,10 +7,12 @@ Méthode de gestion de map : tilemap
 
 # from debug_pygame import show_point
 from sys import setrecursionlimit
+from threading import Thread
+from functools import reduce
 
 import pygame
 
-from CONSTS import coordinate, OnLoadMapError, DEFAULT_DENSITY
+from CONSTS import coordinate, OnLoadMapError, DEFAULT_DENSITY, MAX_THREAD_BY_CALC
 from utils import get_full_line, get_circle
 
 setrecursionlimit(9000000)
@@ -55,7 +57,6 @@ class TileMap:
         :param mappath: Chemin (relatif depuis la root du projet) vers la map
         """
         self.map: list[list[bool]] = []  # [x][y]
-        self.map_transpose: list[list[bool]] = []
         self.texture: list[int] | None = None  # Invalid texture is None - debug // list[int] is bytes to print img
         self.fond: pygame.Surface | None = None
         self.dimensions: list[int] = [0, 0]
@@ -67,9 +68,6 @@ class TileMap:
         Load map from file.
         On notera que la fonction n'hésitera pas à renvoyer des OnLoadMapError pour tout désagraments
         La fonction modifie également les dimensions de la map qui est donné
-        :param mappath: Chemin vers la map
-        :param dimensions: Dimension qui vont être modifié
-        :return: la texture et le fichier vectoriel de map
         """
         texture: str | None = None
         vectmap: list[list[coordinate]] = []
@@ -159,6 +157,7 @@ class TileMap:
                                     self.fond = pygame.image.load(sp[1])
                                 elif sp[0] == "full":
                                     print("load front")
+                                    # pygame.image.tobytes returns [y] then [x]
                                     self.texture = list(pygame.image.tobytes(pygame.image.load(sp[1]), 'ARGB'))
 
         # print("VectMap chargé avec :")
@@ -166,6 +165,10 @@ class TileMap:
         # print(self.texture)
         # print(len(vectmap))
         # print(vectmap)
+
+        ### INTERLUDE ###
+        Thread(group=None, target=self.__reset_ONMAP, name=None).start()
+        ###           ###
 
         # Step2: Obtain segmented map
 
@@ -282,11 +285,11 @@ class TileMap:
 
                         # Add x to the trace
                         if y in Hdict and x in Hdict[y]:
-                            self.set_map_px(x, y, True)
+                            self.map[x][y] = True
 
                         # Add x to fullfilled the inside status of y
                         if y in Hdict and insidetable[y]:
-                            self.set_map_px(x, y, True)
+                            self.map[x][y] = True
 
             # Clean Up !
             for y in range(1, self.dimensions[1] - 1):
@@ -297,10 +300,12 @@ class TileMap:
                     # print(f"There's a bug in y = {y}")
                     inside = False
                     for x in range(max_W + 1, min_W - 1, -1):
-                        if x in Hdict[y] and x - 1 not in Hdict[y]:  # On est en bout;
+                        if x in Hdict[y] and x - 1 not in Hdict[y]:  # On est en bout
                             inside = not inside
                         elif x not in Hdict[y]:
-                            self.set_map_px(x, y, inside)
+                            self.map[x][y] = inside
+
+        self.__filter_image(0, len(self.texture))
 
     def clear_map(self):
         """
@@ -309,16 +314,6 @@ class TileMap:
         self.map = [
             [False for _ in range(self.dimensions[1])] for _ in range(self.dimensions[0])
         ]
-        self.map_transpose = [
-            [False for _ in range(self.dimensions[0])] for _ in range(self.dimensions[1])
-        ]
-
-    def set_map_px(self, x: int, y: int, var: bool):
-        """
-        Method to the boolean value of the pixel of the map
-        """
-        self.map[x][y] = var
-        self.map_transpose[y][x] = var
 
     def print_map(self, screen):
         """
@@ -349,36 +344,54 @@ class TileMap:
         :param impact: coordoniate of the point of the center of the impact
         :param power: the power of the weapon which is the radius of the impact
         """
+        circle = get_circle(DEFAULT_DENSITY, impact, power)
 
-        seg_circle = gen_segmented_map([get_circle(DEFAULT_DENSITY, impact, power)])
+        xmini = reduce(lambda tpA, tpB: tpA if tpA[0] < tpB[0] else tpB, circle)[0]
+        xmaxi = reduce(lambda tpA, tpB: tpA if tpA[0] > tpB[0] else tpB, circle)[0]
+        ymini = reduce(lambda tpA, tpB: tpA if tpA[1] < tpB[1] else tpB, circle)[1]
+        ymaxi = reduce(lambda tpA, tpB: tpA if tpA[1] > tpB[1] else tpB, circle)[1]
+
+        seg_circle = gen_segmented_map([circle])
 
         # for point in seg_circle[0]:
         #     show_point(point, does_stop=False, one_pixel=True)
         # show_point(impact, color=(0,0,255))
 
-        onmap = [[True for y in range(len(self.map[x]))] for x in range(len(self.map))]
+        algo_peinture(seg_circle, self.ONMAP, [impact], base=True)
 
-        algo_peinture(seg_circle, onmap, [impact], base=True)
+        self.map = [
+            [self.map[x][y] and self.ONMAP[x][y] for y in range(len(self.map[x]))] for x in range(len(self.map))
+        ]
 
-        for x in range(len(self.map)):
-            for y in range(len(self.map[x])):
-                self.set_map_px(x, y, self.map[x][y] and onmap[x][y])
+        Thread(group=None, target=self.__reset_ONMAP, name=None).start()
+        # self.tt = 0
+        parter = len(self.texture) // MAX_THREAD_BY_CALC
+        for i in range(MAX_THREAD_BY_CALC):
+            Thread(group=None, target=self.__filter_image, name=None,
+                   kwargs={'_from': parter * i, '_to': parter * (i + 1)}
+                   ).start()
 
-        self.__filter_image()
-
-    def __filter_image(self):
+    def __filter_image(self, _from: int, _to: int):
         """
         Filter the image to set alpha channel of hidden pixel to 0 and the other pixel to 1
+        :param _from: Start processing at px _from (included)
+        :param _to: Ends processing at px _to (excluded)
         """
+        # t1 = time()
         # Make sure we are interacting with images
         assert self.texture != None
-        # print(self.texture)
-        for idx in range(0, len(self.texture), 4):  # Catch only alpha channels
-            # print((idx // 4) // self.dimensions[0], (idx // 4) // self.dimensions[1])
+
+        for idx in range(_from, _to, 4):  # Catch only alpha channels
+        # print((idx // 4) // self.dimensions[0], (idx // 4) // self.dimensions[1])
             if self.map[(idx // 4) % self.dimensions[0]][(idx // 4) // self.dimensions[0]]:
                 self.texture[idx] = 255
             else:
                 self.texture[idx] = 0
+        # t2 = time()
+        # self.tt += t2 - t1
+
+    def __reset_ONMAP(self):
+        self.ONMAP = [[True for y in range(self.dimensions[1])] for x in range(self.dimensions[0])]
 
 
 if __name__ == "__main__":

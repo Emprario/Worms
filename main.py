@@ -5,8 +5,8 @@ Ce module devra également contenir
 """
 
 import pygame
-from map import TileMap
 
+from map import TileMap
 
 pygame.init()
 
@@ -16,6 +16,8 @@ map = TileMap(path)
 SCREEN = pygame.display.set_mode(map.dimensions)
 
 pygame.display.set_caption("PalaVect2")
+
+Oclock = pygame.time.Clock()
 
 run = True
 debug_switch = False
@@ -29,6 +31,8 @@ while run:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_s:
                 debug_switch = not debug_switch
+            # if event.key == pygame.K_d:
+            #    print(map.tt)
             elif event.key == pygame.K_ESCAPE:
                 run = False
         elif event.type == pygame.MOUSEBUTTONDOWN:
@@ -37,3 +41,4 @@ while run:
         elif event.type == pygame.QUIT:
             pygame.quit()
             exit(1)
+    # Oclock.tick(60)
