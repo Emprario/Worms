@@ -19,16 +19,15 @@ pygame.display.set_caption("PalaVect2")
 
 run = True
 while run:
-    map.print_map(map.map, SCREEN)
+    #map.print_map(SCREEN)
+    map.blit_texture(SCREEN)
     pygame.display.flip()
     for event in pygame.event.get():
         if event.type == pygame.KEYDOWN:
             run = False
         elif event.type == pygame.MOUSEBUTTONDOWN:
             print("Mouse point @", pygame.mouse.get_pos())
-            oldmap = map.map
-            map.destroy_map(pygame.mouse.get_pos(), 200.0)
-            print(oldmap == map.map)
+            map.destroy_map(pygame.mouse.get_pos(), 50.0)
         elif event.type == pygame.QUIT:
             pygame.quit()
             exit(1)

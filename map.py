@@ -320,7 +320,7 @@ class TileMap:
         self.map[x][y] = var
         self.map_transpose[y][x] = var
 
-    def print_map(self, skelmap: list[list[bool]], screen):
+    def print_map(self, screen):
         """
         Affiche la map dans un écran à part
         Utilité pour le débugage
@@ -328,10 +328,19 @@ class TileMap:
         """
         for x in range(self.dimensions[0]):
             for y in range(self.dimensions[1]):
-                if skelmap[x][y]:
+                if self.map[x][y]:
                     screen.set_at((x, y), "red")
                 else:
                     screen.set_at((x, y), "black")
+
+    def blit_texture(self, screen):
+        """
+        Affiche la map dans le screen
+        Utilise les textures internes
+        :param screen: Le screen qu'on doit blit dessus
+        """
+        screen.blit(self.fond, (0, 0))
+        screen.blit(pygame.image.frombytes(bytes(self.texture), self.dimensions, 'ARGB'), (0, 0))
 
     def destroy_map(self, impact: coordinate, power: float):
         """
@@ -365,11 +374,11 @@ class TileMap:
         assert self.texture != None
         # print(self.texture)
         for idx in range(0, len(self.texture), 4):  # Catch only alpha channels
-            if self.map[idx % self.dimensions[0]][idx // self.dimensions[0]]:
+            # print((idx // 4) // self.dimensions[0], (idx // 4) // self.dimensions[1])
+            if self.map[(idx // 4) % self.dimensions[0]][(idx // 4) // self.dimensions[0]]:
                 self.texture[idx] = 255
             else:
                 self.texture[idx] = 0
-
 
 
 if __name__ == "__main__":
