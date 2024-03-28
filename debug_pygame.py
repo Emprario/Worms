@@ -7,6 +7,10 @@ DEBUG_SCREEN = pygame.display.set_mode(SIZE)
 pygame.display.set_caption("Debug screen")
 
 
+def get_point_from_idx(idx: int) -> tuple[int, int]:
+    return (idx // 4) % SIZE[0], (idx // 4) // SIZE[0]
+
+
 def show_point(point, *, color=(255, 0, 0), does_stop: bool = True, verbose: bool = False, one_pixel: bool = False):
     if verbose:
         print("highlihting", point)

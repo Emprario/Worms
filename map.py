@@ -5,7 +5,7 @@ Méthode de gestion de map : tilemap
     - Comment représenter dans le programme de la matière
 """
 
-# from debug_pygame import show_point
+from debug_pygame import show_point
 from sys import setrecursionlimit
 from threading import Thread
 from functools import reduce
@@ -363,12 +363,20 @@ class TileMap:
             [self.map[x][y] and self.ONMAP[x][y] for y in range(len(self.map[x]))] for x in range(len(self.map))
         ]
 
+        head = (xmini, ymini)
+        queue = (xmaxi, ymaxi)
+        starter = (head[0]+head[1]*self.dimensions[0])*4
+        goal = (queue[0]+queue[1]*self.dimensions[0])*4
+        # show_point(head, does_stop=False)
+        # show_point(queue)
+
         Thread(group=None, target=self.__reset_ONMAP, name=None).start()
         # self.tt = 0
-        parter = len(self.texture) // MAX_THREAD_BY_CALC
+        parter = (goal-starter) // MAX_THREAD_BY_CALC
+        print(parter, goal, starter)
         for i in range(MAX_THREAD_BY_CALC):
             Thread(group=None, target=self.__filter_image, name=None,
-                   kwargs={'_from': parter * i, '_to': parter * (i + 1)}
+                   kwargs={'_from': starter + parter * i, '_to': starter + parter * (i + 1)}
                    ).start()
 
     def __filter_image(self, _from: int, _to: int):
@@ -377,6 +385,7 @@ class TileMap:
         :param _from: Start processing at px _from (included)
         :param _to: Ends processing at px _to (excluded)
         """
+        print("go from",_from, "to", _to)
         # t1 = time()
         # Make sure we are interacting with images
         assert self.texture != None

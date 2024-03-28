@@ -15,4 +15,4 @@ class OnLoadMapError(Exception):
 
 coordinate = tuple[int, int]
 DEFAULT_DENSITY = 20
-MAX_THREAD_BY_CALC = 128
+MAX_THREAD_BY_CALC = 58

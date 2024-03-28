@@ -7,6 +7,7 @@ Ce module devra également contenir
 import pygame
 
 from map import TileMap
+from debug_pygame import show_point, get_point_from_idx
 
 pygame.init()
 
@@ -32,7 +33,6 @@ while run:
             if event.key == pygame.K_s:
                 debug_switch = not debug_switch
             # if event.key == pygame.K_d:
-            #    print(map.tt)
             elif event.key == pygame.K_ESCAPE:
                 run = False
         elif event.type == pygame.MOUSEBUTTONDOWN:
