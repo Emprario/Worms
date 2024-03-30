@@ -3,11 +3,13 @@ Point d'entrée dans le programme
 Ce module devra également contenir
     - Les instructions pour lancer la boucle principale (dans game_engine.MaitreDuJeu)
 """
+from threading import Thread
 
 import pygame
 
 from map import TileMap
 from debug_pygame import show_point, get_point_from_idx
+from debug_utils import get_time_incache
 
 pygame.init()
 
@@ -22,7 +24,11 @@ Oclock = pygame.time.Clock()
 
 run = True
 debug_switch = False
+
+map.blit_texture(SCREEN, all_pxs=True)
+
 while run:
+    destruction = ()
     if debug_switch:
         map.print_map(SCREEN)
     else:
@@ -32,13 +38,19 @@ while run:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_s:
                 debug_switch = not debug_switch
-            # if event.key == pygame.K_d:
+                map.blit_texture(SCREEN, all_pxs=True)
+            if event.key == pygame.K_d:
+                get_time_incache()
             elif event.key == pygame.K_ESCAPE:
                 run = False
         elif event.type == pygame.MOUSEBUTTONDOWN:
             print("Mouse point @", pygame.mouse.get_pos())
-            map.destroy_map(pygame.mouse.get_pos(), 50.0)
+            destruction = (pygame.mouse.get_pos(), 50.0)
         elif event.type == pygame.QUIT:
             pygame.quit()
             exit(1)
-    # Oclock.tick(60)
+
+    if destruction != ():
+        Thread(group=None, target=map.destroy_map, name=None, args=destruction).start()
+
+    Oclock.tick(60)
