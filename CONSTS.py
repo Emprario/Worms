@@ -16,3 +16,5 @@ class OnLoadMapError(Exception):
 coordinate = tuple[int, int]
 DEFAULT_DENSITY = 20
 MAX_THREAD_BY_CALC = 1
+SIMULTANITY_THRESHOLD = 128
+MIN_SIMULTANITY_THRESHOLD = 3

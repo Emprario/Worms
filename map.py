@@ -8,12 +8,15 @@ Méthode de gestion de map : tilemap
 from functools import reduce
 from sys import setrecursionlimit
 from threading import Thread
+from time import time
 
 import pygame
 
-from CONSTS import coordinate, OnLoadMapError, DEFAULT_DENSITY
+from CONSTS import coordinate, OnLoadMapError, DEFAULT_DENSITY, SIMULTANITY_THRESHOLD, MIN_SIMULTANITY_THRESHOLD
 from debug_pygame import get_point_from_idx
 from utils import get_full_line, get_circle
+
+# from time import time
 
 setrecursionlimit(9000000)
 
@@ -64,8 +67,13 @@ class TileMap:
         self.fond: list[int] | None = None
         self.dimensions: list[int] = [0, 0]
         self.form_borders: list[list[coordinate]] = []
+        self.destruction_stack: list[tuple[coordinate, float]] = []
+        self.ONMAPs: dict[int, list[list[bool]]] = {i: [] for i in range(SIMULTANITY_THRESHOLD)}
+        self.available_ONMAPs: [int] = []
+        self.clear_ONMAPs: [int] = [i for i in range(SIMULTANITY_THRESHOLD)]
         self.reset_ONMAP_thread: Thread | None = None
         self.px_update_list: list[int] = []
+
         # Step 1: Extract vectorial map
 
         """
@@ -171,9 +179,12 @@ class TileMap:
         # print(vectmap)
 
         ### INTERLUDE ###
-        self.TRUEMAP = [[True for y in range(self.dimensions[1])] for x in range(self.dimensions[0])]
-        Thread(group=None, target=self.__reset_ONMAP, name=None).start()
-        ###           ###
+        # self.TRUEMAP = [[True for _ in range(self.dimensions[1])] for _ in range(self.dimensions[0])]
+        self.reset_ONMAP_thread = Thread(group=None, target=self.__reset_ONMAP, name=None)
+        self.reset_ONMAP_thread.start()
+        while len(self.available_ONMAPs) < MIN_SIMULTANITY_THRESHOLD:
+            continue
+        ###   #####   ###
 
         # Step2: Obtain segmented map
 
@@ -343,8 +354,10 @@ class TileMap:
             screen.blit(pygame.image.frombytes(bytes(self.fond), self.dimensions, 'ARGB'), (0, 0))
             screen.blit(pygame.image.frombytes(bytes(self.texture), self.dimensions, 'ARGB'), (0, 0))
         else:
+            screen.lock()
             while len(self.px_update_list) > 0:
                 self.update_px(self.px_update_list.pop(), screen)
+            screen.unlock()
 
     def update_px(self, idx: int, screen) -> None:
         """
@@ -352,7 +365,19 @@ class TileMap:
         :param idx: Pixel index in self.texture (should point on Alpha channel)
         :param screen: The screen to update
         """
-        screen.set_at(get_point_from_idx(idx), self.fond[idx + 1:idx + 4])
+        if self.texture[idx] == 255:
+            screen.set_at(get_point_from_idx(idx), self.texture[idx + 1:idx + 4])
+        elif self.texture[idx] == 0:
+            screen.set_at(get_point_from_idx(idx), self.fond[idx + 1:idx + 4])
+        else:
+            raise AttributeError("An alpha channel should be either 0 or 255")
+
+    def void_destruction_stack(self):
+        """
+        Loop to empty the destruction stack
+        """
+        while len(self.destruction_stack) > 0:
+            Thread(group=None, target=self.destroy_map, name=None, args=self.destruction_stack.pop()).start()
 
     # @get_time
     def destroy_map(self, impact: coordinate, power: float):
@@ -375,11 +400,20 @@ class TileMap:
         #     show_point(point, does_stop=False, one_pixel=True)
         # show_point(impact, color=(0,0,255))
 
-        algo_peinture(seg_circle, self.ONMAP, [impact], self.dimensions, base=True)
+        while len(self.available_ONMAPs) == 0:
+            # print("Available :", self.available_ONMAPs)
+            # print("To clean :", self.clear_ONMAPs)
+            continue
+        AX = self.available_ONMAPs.pop()
 
-        for x in range(len(self.map)):
-            for y in range(len(self.map[x])):
-                self.map[x][y] = self.map[x][y] and self.ONMAP[x][y]
+        algo_peinture(seg_circle, self.ONMAPs[AX], [impact], self.dimensions, base=True)
+
+        # t1 = time()
+        for x in range(xmini, xmaxi + 1):
+            for y in range(ymini, ymaxi + 1):
+                self.map[x][y] = self.map[x][y] and self.ONMAPs[AX][x][y]
+        # t2 = time()
+        # print(t2 - t1)
 
         head = (xmini, ymini)
         # queue = (xmaxi, ymaxi)
@@ -388,10 +422,10 @@ class TileMap:
         # show_point(head, does_stop=False)
         # show_point(queue)
 
-        while self.reset_ONMAP_thread:
-            pass
-
-        Thread(group=None, target=self.__reset_ONMAP, name=None).start()
+        self.clear_ONMAPs.append(AX)
+        if not self.reset_ONMAP_thread.is_alive():
+            self.reset_ONMAP_thread = Thread(group=None, target=self.__reset_ONMAP, name=None)
+            self.reset_ONMAP_thread.start()
 
         # self.tt = 0
         parter = (xmaxi - xmini) * 4
@@ -427,14 +461,15 @@ class TileMap:
                     self.texture[idx] = 0
         else:
             for idx in range(_from, _to, 4):  # Catch only alpha channels
+                x, y = (idx // 4) % self.dimensions[0], (idx // 4) // self.dimensions[0]
                 if (
-                        self.map[(idx // 4) % self.dimensions[0]][(idx // 4) // self.dimensions[0]]
+                        self.map[x][y]
                         and self.texture[idx] != 255
                 ):
                     self.texture[idx] = 255
                     self.px_update_list.append(idx)
                 elif (
-                        not self.map[(idx // 4) % self.dimensions[0]][(idx // 4) // self.dimensions[0]]
+                        not self.map[x][y]
                         and self.texture[idx] != 0
                 ):
                     self.texture[idx] = 0
@@ -444,9 +479,11 @@ class TileMap:
         # self.tt += t2 - t1
 
     def __reset_ONMAP(self):
-        self.reset_ONMAP_thread = True
-        self.ONMAP = self.TRUEMAP.copy()
-        self.reset_ONMAP_thread = False
+        while len(self.clear_ONMAPs) > 0:
+            AX = self.clear_ONMAPs.pop()
+            # self.ONMAPs[AX] = deepcopy(self.TRUEMAP)
+            self.ONMAPs[AX] = [[True for _ in range(self.dimensions[1])] for _ in range(self.dimensions[0])]
+            self.available_ONMAPs.append(AX)
 
 
 if __name__ == "__main__":
