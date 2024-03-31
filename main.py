@@ -28,33 +28,34 @@ run = True
 debug_switch = False
 fps = 0
 
-map.blit_texture(SCREEN, all_pxs=True)
+map.blit_texture(all_pxs=True)
 
 while run:
     destruction = ()
     if debug_switch:
-        map.print_map(SCREEN)
+        map.print_map()
     else:
-        map.blit_texture(SCREEN)
-    pygame.display.flip()
+        map.blit_texture()
+    SCREEN.blit(map.Surf, (0, 0))
+    pygame.display.update()
     for event in pygame.event.get():
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_s:
                 debug_switch = not debug_switch
-                map.blit_texture(SCREEN, all_pxs=True)
+                map.blit_texture(all_pxs=True)
             elif event.key == pygame.K_d:
                 get_time_incache()
                 print("Available :", map.available_ONMAPs)
                 print("To clean :", map.clear_ONMAPs)
             elif event.key == pygame.K_f:
                 map = TileMap(path)
-                map.blit_texture(SCREEN, all_pxs=True)
+                map.blit_texture(all_pxs=True)
             elif event.key == pygame.K_ESCAPE:
                 run = False
         elif event.type == pygame.MOUSEBUTTONDOWN:
             print("Mouse point @", pygame.mouse.get_pos())
-            circle = get_circle(10, pos := pygame.mouse.get_pos(), radius := 40)
-            map.destruction_stack.append((pygame.mouse.get_pos(), radius))
+            circle = get_circle(5, pos := pygame.mouse.get_pos(), radius := 40)
+            map.destruction_stack.append((pygame.mouse.get_pos(), 40.0))
             map.destruction_stack.extend([(circle[i], 20.0) for i in range(len(circle))])
         elif event.type == pygame.QUIT:
             pygame.quit()
@@ -62,7 +63,7 @@ while run:
 
     map.void_destruction_stack()
 
-    # Oclock.tick(144)
+    Oclock.tick()
 
     #if fps != Oclock.get_fps() and (fps := Oclock.get_fps()) < 60 and fps != 0:
     #    print(f"/!\\ Low tick /!\\ framerate@{fps}")

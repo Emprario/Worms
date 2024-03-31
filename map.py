@@ -8,7 +8,6 @@ Méthode de gestion de map : tilemap
 from functools import reduce
 from sys import setrecursionlimit
 from threading import Thread
-from time import time
 
 import pygame
 
@@ -179,11 +178,12 @@ class TileMap:
         # print(vectmap)
 
         ### INTERLUDE ###
-        # self.TRUEMAP = [[True for _ in range(self.dimensions[1])] for _ in range(self.dimensions[0])]
         self.reset_ONMAP_thread = Thread(group=None, target=self.__reset_ONMAP, name=None)
         self.reset_ONMAP_thread.start()
         while len(self.available_ONMAPs) < MIN_SIMULTANITY_THRESHOLD:
             continue
+
+        self.Surf = pygame.Surface((self.dimensions[0], self.dimensions[1]))
         ###   #####   ###
 
         # Step2: Obtain segmented map
@@ -331,44 +331,47 @@ class TileMap:
             [False for _ in range(self.dimensions[1])] for _ in range(self.dimensions[0])
         ]
 
-    def print_map(self, screen):
+    def print_map(self):
         """
         Affiche la map dans un écran à part
         Utilité pour le débugage
         :param skelmap: La map à afficher
         """
+        self.Surf.lock()
         for x in range(self.dimensions[0]):
             for y in range(self.dimensions[1]):
                 if self.map[x][y]:
-                    screen.set_at((x, y), "red")
+                    self.Surf.set_at((x, y), pygame.Color("red"))
                 else:
-                    screen.set_at((x, y), "black")
+                    self.Surf.set_at((x, y), pygame.Color("black"))
+        self.Surf.unlock()
 
-    def blit_texture(self, screen, *, all_pxs: bool = False):
+    def blit_texture(self, *, all_pxs: bool = False):
         """
         Affiche la map dans le screen
         Utilise les textures internes
         :param screen: Le screen qu'on doit blit dessus
         """
         if all_pxs:
-            screen.blit(pygame.image.frombytes(bytes(self.fond), self.dimensions, 'ARGB'), (0, 0))
-            screen.blit(pygame.image.frombytes(bytes(self.texture), self.dimensions, 'ARGB'), (0, 0))
+            self.Surf.blit(pygame.image.frombytes(bytes(self.fond), self.dimensions, 'ARGB'), (0, 0))
+            self.Surf.blit(pygame.image.frombytes(bytes(self.texture), self.dimensions, 'ARGB'), (0, 0))
         else:
-            screen.lock()
+            self.Surf.lock()
             while len(self.px_update_list) > 0:
-                self.update_px(self.px_update_list.pop(), screen)
-            screen.unlock()
+                self.update_px(self.px_update_list.pop())
+            self.Surf.unlock()
 
-    def update_px(self, idx: int, screen) -> None:
+    def update_px(self, idx: int) -> None:
         """
         Blit the pixel given on screen
         :param idx: Pixel index in self.texture (should point on Alpha channel)
         :param screen: The screen to update
         """
+        x, y = get_point_from_idx(idx)
         if self.texture[idx] == 255:
-            screen.set_at(get_point_from_idx(idx), self.texture[idx + 1:idx + 4])
+            self.Surf.set_at((x, y), self.texture[idx + 1:idx + 4])
         elif self.texture[idx] == 0:
-            screen.set_at(get_point_from_idx(idx), self.fond[idx + 1:idx + 4])
+            self.Surf.set_at((x, y), self.fond[idx + 1:idx + 4])
         else:
             raise AttributeError("An alpha channel should be either 0 or 255")
 
