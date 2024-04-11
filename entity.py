@@ -2,14 +2,15 @@ from math import cos, sin
 from CONSTS import G
 
 
-class Player:
+class Entity:
 
-    def __init__(self, x: int, y: int):
+    def __init__(self, x: int, y: int):  # , map: list[list[bool]]):
         self.rx: float = x
         self.ry: float = y
         self.x: int = x
         self.y: int = y
-
+        # if map[self.x][self.y]:
+        #    raise AssertionError("The worms is not supposed to be in a wall")
 
     def update_co_from_rco(self):
         self.x, self.y = int(round(self.rx)), int(round(self.ry))

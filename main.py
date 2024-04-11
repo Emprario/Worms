@@ -25,8 +25,8 @@ SCREEN = pygame.display.set_mode(map.dimensions, flags)
 pygame.display.set_caption("PalaVect2")
 
 Oclock = pygame.time.Clock()
+tick = 0
 
-run = True
 debug_switch = False
 fps = 0
 
@@ -75,7 +75,8 @@ while run:
             all_moves[i][-1](*all_moves[i][:-1], result[2])
             del all_moves[i]
 
-    Oclock.tick()
+    Oclock.tick(FRAMERATE)
+    tick += 1
 
-    #if fps != Oclock.get_fps() and (fps := Oclock.get_fps()) < 60 and fps != 0:
+    # if fps != Oclock.get_fps() and (fps := Oclock.get_fps()) < 60 and fps != 0:
     #    print(f"/!\\ Low tick /!\\ framerate@{fps}")
