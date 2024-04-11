@@ -11,6 +11,8 @@ from map import TileMap
 from debug_pygame import show_point, get_point_from_idx
 from debug_utils import get_time_incache
 from utils import get_circle
+from CONSTS import FRAMERATE
+from physics import all_moves, translation
 
 pygame.init()
 
@@ -30,6 +32,7 @@ fps = 0
 
 map.blit_texture(all_pxs=True)
 
+run = True
 while run:
     destruction = ()
     if debug_switch:
@@ -37,6 +40,8 @@ while run:
     else:
         map.blit_texture()
     SCREEN.blit(map.Surf, (0, 0))
+    tt = (map.Surf, (0, 0))
+    SCREEN.blit(*tt)
     pygame.display.update()
     for event in pygame.event.get():
         if event.type == pygame.KEYDOWN:
@@ -62,6 +67,13 @@ while run:
             exit(1)
 
     map.void_destruction_stack()
+
+    for i in range(len(all_moves)):
+        result = translation(*all_moves[i][:-1])
+        all_moves[i][-3] = result[1]
+        if not result[0]:
+            all_moves[i][-1](*all_moves[i][:-1], result[2])
+            del all_moves[i]
 
     Oclock.tick()
 
