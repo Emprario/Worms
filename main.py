@@ -46,7 +46,6 @@ while run:
     SCREEN.blit(map.Surf, (0, 0))
     tt = (map.Surf, (0, 0))
     SCREEN.blit(*tt)
-    pygame.display.update()
     for event in pygame.event.get():
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_s:
@@ -85,7 +84,7 @@ while run:
         #         projectile.kill()
         # Affichage
         print(sprite.x, sprite.y)
-        SCREEN.blit(sprite.image, sprite.x, sprite.y)
+        SCREEN.blit(sprite.image, (sprite.x, sprite.y))
 
 
 
@@ -98,6 +97,7 @@ while run:
             all_moves[i][-1](*all_moves[i][:-1], result[2])
             del all_moves[i]
 
+    pygame.display.flip()
     Oclock.tick(FRAMERATE)
     tick += 1
 
