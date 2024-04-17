@@ -1,10 +1,13 @@
+import pygame
+
 from math import cos, sin
 from CONSTS import G
 
 
-class Entity:
+class Entity(pygame.sprite.Sprite):
 
     def __init__(self, x: int, y: int):  # , map: list[list[bool]]):
+        super().__init__()
         self.rx: float = x
         self.ry: float = y
         self.x: int = x

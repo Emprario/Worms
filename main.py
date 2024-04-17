@@ -13,6 +13,7 @@ from debug_utils import get_time_incache
 from utils import get_circle
 from CONSTS import FRAMERATE
 from physics import all_moves, translation
+from weapon import *
 
 pygame.init()
 
@@ -31,6 +32,9 @@ debug_switch = False
 fps = 0
 
 map.blit_texture(all_pxs=True)
+
+all_sprites = pygame.sprite.Group()
+# obstacles = pygame.sprite.Group()
 
 run = True
 while run:
@@ -57,6 +61,13 @@ while run:
                 map.blit_texture(all_pxs=True)
             elif event.key == pygame.K_ESCAPE:
                 run = False
+
+            elif event.key == pygame.K_SPACE:
+                projectile = Projectile(map.dimensions[0]// 2, map.dimensions[1]//2, "")
+                all_sprites.add(projectile)
+                projectile.launched = True
+                print("missile launched")
+
         elif event.type == pygame.MOUSEBUTTONDOWN:
             print("Mouse point @", pygame.mouse.get_pos())
             circle = get_circle(5, pos := pygame.mouse.get_pos(), radius := 40)
@@ -65,6 +76,18 @@ while run:
         elif event.type == pygame.QUIT:
             pygame.quit()
             exit(1)
+
+    # Upadte dezs sprites
+    for sprite in all_sprites:
+        # if isinstance(projectile, Projectile) and projectile.launched:
+        #     collisions = pygame.sprite.spritecollide(projectile, obstacles, True)
+        #     if collisions:
+        #         projectile.kill()
+        # Affichage
+        print(sprite.x, sprite.y)
+        SCREEN.blit(sprite.image, sprite.x, sprite.y)
+
+
 
     map.void_destruction_stack()
 
