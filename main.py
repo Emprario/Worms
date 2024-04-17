@@ -13,7 +13,7 @@ from debug_utils import get_time_incache
 from utils import get_circle
 from CONSTS import FRAMERATE
 from physics import all_moves, translation
-from weapon import *
+from weapon import Projectile
 
 pygame.init()
 
@@ -64,6 +64,7 @@ while run:
             elif event.key == pygame.K_SPACE:
                 projectile = Projectile(map.dimensions[0]// 2, map.dimensions[1]//2, "")
                 all_sprites.add(projectile)
+                projectile.add_to_move(all_moves, map.map)
                 projectile.launched = True
                 print("missile launched")
 

@@ -13,14 +13,22 @@ from entity import Entity
 # BLACK = (0, 0, 0)
 # RED = (255, 0, 0)
 
+# all_moves: list[tuple[float, float, list[list[bool]], coordinate, Entity, bool, int, Callable]] = list()
 class Projectile(Entity):
     def __init__(self, x: int, y: int, image: str):
         super().__init__(x, y)
-        self.image = pygame.Surface((100, 100))
+        self.image = pygame.Surface((10, 10))
         self.image.fill("red")
         # self.rect = self.image.get_rect()
         self.speed = 5
         self.launched = False
+
+    def destroy(self, *args):
+        pass
+
+    def add_to_move(self, movelst: list, map: list[list[bool]]):
+        movelst.append([50, 0, map, (self.x, self.y), self, True, 0, self.destroy])
+
 
 """    def update(self):
         if self.launched:

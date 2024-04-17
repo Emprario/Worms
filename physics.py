@@ -3,7 +3,7 @@ from CONSTS import coordinate
 from utils import get_full_line
 from typing import Callable
 
-all_moves: list[tuple[float, float, list[list[bool]], coordinate, Entity, bool, int, Callable]] = list()
+all_moves: list[list[float, float, list[list[bool]], coordinate, Entity, bool, int, Callable]] = list()
 
 # var: Callable = translation
 """
