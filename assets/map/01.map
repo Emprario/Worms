@@ -221,4 +221,5 @@ STARTSTOP
 1244 275
 1230 283
 TEXTUREPATH
-notprovided
+full assets/textures/01full.png
+empty assets/textures/01empty.png

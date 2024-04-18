@@ -4,12 +4,19 @@ Il faut veiller à n'importer aucun module dans celui-ci sauf des modules extern
 Merci de mettre des hints sur les constantes dans le programme afin de faciliter leurs utilisations.
 """
 
+
 # Errors
 
 class OnLoadMapError(Exception):
     pass
 
+
 # Constantes
 
 coordinate = tuple[int, int]
 DEFAULT_DENSITY = 20
+MAX_THREAD_BY_CALC = 1
+SIMULTANITY_THRESHOLD = 128
+MIN_SIMULTANITY_THRESHOLD = 3
+G = 0.075
+FRAMERATE = 60

@@ -1,7 +1,10 @@
 import pygame
+from entity import Entity
+
+"""Il faut changer l'apel de moveworms dans main, appel de la fonction à chaque frame"""
 
 
-class Worm:
+class Worm(Entity):
     """Classe du ver de terre"""
 
     def __init__(self, camp: int, x: int, y: int, hp=100):
@@ -9,9 +12,8 @@ class Worm:
         Constructeur de Worm
         :param camp: Camp du worm (pas nécessairement binaire)
         """
+        super().__init__(x, y)
         self.team = camp # L'équipe du worm
-        self.x_coord = x
-        self.y_coord = y
         self.health = hp
         self.alive = True # Checker si le worm est en vie
         self.is_jumping = False # Checker si le joueur saute
@@ -22,31 +24,36 @@ class Worm:
         self.movement_speed = 40 # SUBJECT TO CHANGE
         self.image = pygame.image.load("assets/worm/worm_sprite.png").convert_alpha()
 
+    def drop_worm(self, map, movelst):
+        """
+
+        """
+        # movelst.append([40, -10, map, (self.x, self.y), self, True, 0])
+
+
+
+
     def move_worm(self, x_axis, y_axis):
         """
         Permet de déplacer le worm dans les deux directions
         :param x_axis: Type(int) gauche à droite
         :param y_axis: Type(int) haut à bas
         """
-        self.x_coord += x_axis
-        self.y_coord += y_axis
 
-        # NEW IDEA FOR WORM MOVEMENT:
-        """
-        Move the x axis however but to make sure that we don't walk through the map,
-        we use the get_full_line and use all the coordinates grabbed from it.
-        When moving left or right, we constantly check
-        """
+        """if the_y_coord > (self.y + 3):
+            pass
+        elif the_y_coord < (self.y - 3):
+            call drop function
+        else:
+            self.y = the_y_coord"""
 
-        distance_travelled = 0
+        self.x += x_axis
 
-    def jump_worm_check(self):
-        """
-        Vérifie si le worm peut sauter ou pas. Il faut qu'il soit au sol
-        """
-        if self.is_on_ground:
-            self.is_jumping = True
-            self.is_on_ground = False
+        """ pour le deplacement sur les surface inclinés: prendre la colone
+        pixel à droite ou gauch (selon le input), parcourir cet colone pour trouver
+        les points de contour (les pixel True apres un false). Ensuite faire la différence
+        de y de ces points avec le y du joueur pour trouver le point de contour le plus proche."""
+
 
     def jump_worm(self):
         """
@@ -58,7 +65,7 @@ class Worm:
                 direction = 1  # Le worms monte
                 if self.jump_current < 0:
                     direction = -1  # Le worms descend
-                self.y_coord -= (self.jump_current ** 2) * 0.5 * direction
+                self.y -= (self.jump_current ** 2) * 0.5 * direction
                 self.jump_current -= 1
             else:
                 self.is_jumping = False
@@ -66,7 +73,7 @@ class Worm:
                 self.is_on_ground = True
 
     def draw(self, screen):
-        screen.blit(self.image, (self.x_coord, self.y_coord))
+        screen.blit(self.image, (self.x, self.y))
 
     def pg_blit(self, surface: pygame.Surface):
         """Pygame Blit : Fonction d'affichage spécifique au worm"""
