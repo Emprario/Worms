@@ -26,8 +26,9 @@ class Projectile(Entity):
     def destroy(self, *args):
         pass
 
-    def add_to_move(self, movelst: list, map: list[list[bool]]):
-        movelst.append([50, 0, map, (self.x, self.y), self, True, 0, self.destroy])
+    # all_moves: list[list[float, float, list[list[bool]], Entity, bool, int, Callable]] = list()
+    def add_to_move(self, movelst: list, map: list[list[bool]], tick: int):
+        movelst.append([50, 0, map, self, True, tick, self.destroy])
 
 
 """    def update(self):

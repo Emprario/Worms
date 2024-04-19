@@ -3,13 +3,13 @@ from CONSTS import coordinate
 from utils import get_full_line
 from typing import Callable
 
-all_moves: list[list[float, float, list[list[bool]], coordinate, Entity, bool, int, Callable]] = list()
+all_moves: list[list[float, float, list[list[bool]], Entity, bool, int, Callable]] = list()
 
 # var: Callable = translation
 """
 fall: Callable = fall_damage
 
-def fall_damage(velocity: float, cst: int):
+def fall_damage(velocity: float, cst: int):     
     if velocity > cst:
         return (velocity-cst) * x  # x to define -> depend on player max HP
 """
@@ -53,7 +53,8 @@ def translation(v_init: float, alpha: float, map: list[list[bool]], point0: coor
                 impact = lst[i]
                 i += step
 
-            entity.x, entity.y = impact
-
-        return False, force, v_impact
-    return True, force, None
+                entity.x, entity.y = impact
+                break
+        return False, force, None
+    x, y = entity.get_speed(local_tick, v_init, alpha)
+    return True, force, (x ** 2 + y ** 2) ** 0.5
