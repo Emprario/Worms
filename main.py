@@ -84,7 +84,7 @@ while run:
         #     if collisions:
         #         projectile.kill()
         # Affichage
-        print(sprite.x, sprite.y)
+        # print(sprite.x, sprite.y)
         SCREEN.blit(sprite.image, (sprite.x, sprite.y))
 
 
@@ -96,9 +96,11 @@ while run:
     while i < len(all_moves):
         result = translation(*all_moves[i][:-2], tick - all_moves[i][-2])
         all_moves[i][-3] = result[1]
-        if not result[0]:
+        if result[0]:
             all_moves[i][-1](*all_moves[i][:-1], result[2])
             del all_moves[i]
+        else:
+            i += 1
 
     pygame.display.flip()
     Oclock.tick(FRAMERATE)

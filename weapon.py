@@ -1,6 +1,7 @@
 import pygame
 
 from entity import Entity
+from math import pi
 
 # path = "assets/map/01.map"
 # map = TileMap(path)
