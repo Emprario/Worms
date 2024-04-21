@@ -80,12 +80,18 @@ while run:
             pygame.quit()
             exit(1)
 
+
+    #------------- Worms part ---------------------
+    x_movement = 0
     keys = pygame.key.get_pressed()
     if keys[pygame.K_LEFT]:
-        player.move_worm(-1, 0)
+        x_movement = -2
     if keys[pygame.K_RIGHT]:
-        player.move_worm(1, 0)
+        x_movement = 2
+    player.move_worm(x_movement, 0, map.map)
     player.draw(SCREEN)
+    #----------------------------------------------
+
     # Upadte dezs sprites
     for sprite in all_sprites:
         # if isinstance(projectile, Projectile) and projectile.launched:
