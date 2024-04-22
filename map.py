@@ -71,7 +71,7 @@ class TileMap:
         self.available_ONMAPs: [int] = []
         self.clear_ONMAPs: [int] = [i for i in range(SIMULTANITY_THRESHOLD)]
         self.reset_ONMAP_thread: Thread | None = None
-        self.px_update_list: list[int] = []
+        self.px_update_list: set[int] = set()
 
         # Step 1: Extract vectorial map
 
@@ -470,13 +470,13 @@ class TileMap:
                         and self.texture[idx] != 255
                 ):
                     self.texture[idx] = 255
-                    self.px_update_list.append(idx)
+                    self.px_update_list.add(idx)
                 elif (
                         not self.map[x][y]
                         and self.texture[idx] != 0
                 ):
                     self.texture[idx] = 0
-                    self.px_update_list.append(idx)
+                    self.px_update_list.add(idx)
 
         # t2 = time()
         # self.tt += t2 - t1
