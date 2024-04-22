@@ -18,8 +18,9 @@ class Entity(pygame.sprite.Sprite):
     def update_co_from_rco(self):
         self.x, self.y = int(round(self.rx)), int(round(self.ry))
 
-    def move_to(self, t, v0, alpha, X0, Y0):
-        self.ry, self.rx = (1 / 2) * G * (t ** 2) + v0 * sin(alpha) * t + Y0, v0 * cos(alpha) * t + X0
+    def move_to(self, t, v0, alpha, mod):
+        self.ry += mod * (G * t + v0 * sin(alpha))
+        self.rx += mod * v0 * cos(alpha)
         self.update_co_from_rco()
 
     def get_speed(self, t, v0, alpha):

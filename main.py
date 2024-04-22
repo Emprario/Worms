@@ -20,8 +20,8 @@ pygame.init()
 path = "assets/map/01.map"
 map = TileMap(path)
 
-flags = pygame.FULLSCREEN | pygame.HWSURFACE
-SCREEN = pygame.display.set_mode(map.dimensions, flags)
+#flags = pygame.FULLSCREEN | pygame.HWSURFACE
+SCREEN = pygame.display.set_mode(map.dimensions)
 
 pygame.display.set_caption("PalaVect2")
 
@@ -64,7 +64,7 @@ while run:
             elif event.key == pygame.K_SPACE:
                 projectile = Projectile(map.dimensions[0]// 2, map.dimensions[1]//2, "")
                 all_sprites.add(projectile)
-                projectile.add_to_move(all_moves, map.map)
+                projectile.add_to_move(all_moves, map.map, tick)
                 projectile.launched = True
                 print("missile launched")
 
@@ -84,19 +84,23 @@ while run:
         #     if collisions:
         #         projectile.kill()
         # Affichage
-        print(sprite.x, sprite.y)
+        # print(sprite.x, sprite.y)
         SCREEN.blit(sprite.image, (sprite.x, sprite.y))
 
 
 
     map.void_destruction_stack()
-
-    for i in range(len(all_moves)):
-        result = translation(*all_moves[i][:-1])
+    print(tick, [move[3] for move in all_moves])
+    i = 0
+    # bug actuel : out of range au bout de 10 sec environ
+    while i < len(all_moves):
+        result = translation(*all_moves[i][:-2], tick - all_moves[i][-2])
         all_moves[i][-3] = result[1]
-        if not result[0]:
+        if result[0]:
             all_moves[i][-1](*all_moves[i][:-1], result[2])
             del all_moves[i]
+        else:
+            i += 1
 
     pygame.display.flip()
     Oclock.tick(FRAMERATE)
