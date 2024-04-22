@@ -20,8 +20,8 @@ pygame.init()
 path = "assets/map/01.map"
 map = TileMap(path)
 
-#flags = pygame.FULLSCREEN | pygame.HWSURFACE
-SCREEN = pygame.display.set_mode(map.dimensions)
+flags = pygame.FULLSCREEN | pygame.HWSURFACE
+SCREEN = pygame.display.set_mode(map.dimensions, flags)
 
 pygame.display.set_caption("PalaVect2")
 
@@ -90,13 +90,15 @@ while run:
 
 
     map.void_destruction_stack()
-    print(tick, [move[3] for move in all_moves])
     i = 0
     # bug actuel : out of range au bout de 10 sec environ
     while i < len(all_moves):
+        print(tick, [move[3] for move in all_moves])
         result = translation(*all_moves[i][:-2], tick - all_moves[i][-2])
+        # print(result)
         all_moves[i][-3] = result[1]
         if result[0]:
+            print("Killed")
             all_moves[i][-1](*all_moves[i][:-1], result[2])
             del all_moves[i]
         else:
