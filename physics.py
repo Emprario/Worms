@@ -2,6 +2,7 @@ from entity import Entity
 from CONSTS import coordinate, MILITICK
 from utils import get_full_line
 from typing import Callable
+from functools import reduce
 
 all_moves: list[list[float, float, list[list[bool]], Entity, bool, int, Callable]] = list()
 
@@ -20,15 +21,19 @@ def translation(v_init: float, alpha: float, map: list[list[bool]], entity: Enti
     """
     si quelqu'un trouve un bug sachez que vous pouvez me trouver au cimetière
     """
-    if force or (not map[entity.x][entity.y + 1] and not map[entity.x][entity.y]):
+    prox = reduce(lambda pre, nex: pre or nex,
+                  [map[entity.x + X][entity.y + Y] for X in range(-1, 2) for Y in range(-1, 2)]
+                  )
+    if force or not prox:
         for militick in range(0, MILITICK):
             temp = entity.x, entity.y
             entity.move_to(local_tick, v_init, alpha, 1 / MILITICK)
 
-            if not map[entity.x][entity.y + 1]:
-                force = False
+            # if not map[entity.x][entity.y + 1]:
+            #    force = False
             # print(entity.x)
             if map[entity.x][entity.y]:
+                force = False
 
                 lst = get_full_line(temp, (entity.x, entity.y))
                 if lst[0] == temp:
