@@ -8,12 +8,11 @@ Méthode de gestion de map : tilemap
 from functools import reduce
 from sys import setrecursionlimit
 from threading import Thread
-from numpy import array
 
 import pygame
+from numpy import array
 
 from CONSTS import coordinate, OnLoadMapError, DEFAULT_DENSITY, SIMULTANITY_THRESHOLD, MIN_SIMULTANITY_THRESHOLD
-from debug_pygame import get_point_from_idx
 from utils import get_full_line, get_circle
 
 # from time import time
@@ -48,6 +47,7 @@ def algo_peinture(segmap: list[list[coordinate]], fmap: list[list[bool]], center
     :param dim: Les dimensions
     :param base: La couleur de fond de la map
     """
+
     def fill_neighbours(point: coordinate, segform: set[coordinate]):
         # print(segform)
         fmap[point[0]][point[1]] = not base
@@ -83,6 +83,10 @@ class TileMap:
         self.reset_ONMAP_thread: Thread | None = None
         self.px_update_list: set[tuple[int, int]] = set()
         self.Surf: pygame.Surface | None = None
+
+        # Lock vars
+        self.askforlocking: bool = False
+        self.active_update_texture: int = 0
 
         # Step 1: Extract vectorial map
 
@@ -176,11 +180,11 @@ class TileMap:
                             else:
                                 if sp[0] == "empty":
                                     print("load fond")
-                                    self.fond = pygame.surfarray.array3d(pygame.image.load(sp[1]))
+                                    self.fond = pygame.image.load(sp[1]).convert_alpha()
                                 elif sp[0] == "full":
                                     print("load front")
                                     # pygame.image.tobytes returns [y] then [x]
-                                    self.texture = pygame.surfarray.array3d(pygame.image.load(sp[1]))
+                                    self.texture = pygame.image.load(sp[1]).convert_alpha()
 
         # print("VectMap chargé avec :")
         # print(self.dimensions)
@@ -195,8 +199,8 @@ class TileMap:
             continue
 
         self.Surf = pygame.Surface(self.dimensions)
-        self.texture = pygame.surfarray.map_array(self.Surf, self.texture)
-        self.fond = pygame.surfarray.map_array(self.Surf, self.fond)
+        # self.texture = pygame.surfarray.map_array(self.Surf, self.texture)
+        # self.fond = pygame.surfarray.map_array(self.Surf, self.fond)
         # self.pxd_array = self.texture.copy()
 
         print("Array Copied !")
@@ -341,7 +345,7 @@ class TileMap:
             [False for _ in range(self.dimensions[1])] for _ in range(self.dimensions[0])
         ]
 
-    def blit_texture(self, *, all_pxs: bool = False):
+    def update_texture(self, *, all_pxs: bool = False):
         """
         Affiche la map dans le screen
         Utilise les textures internes
@@ -350,23 +354,38 @@ class TileMap:
         if all_pxs:
             self.__start_filter_image((0, 0), self.dimensions)
 
-        self.pixels = pygame.surfarray.pixels2d(self.Surf)
-        while len(self.px_update_list) > 0:
-            self.update_px(self.px_update_list.pop())
-        del self.pixels
+        pixels = pygame.surfarray.pixels_alpha(self.texture)
+        try:
+            while len(self.px_update_list) > 0:
+                self.update_px(pixels, self.px_update_list.pop())
+        except KeyError:
+            pass
+        del pixels
 
-    def update_px(self, coo: coordinate):
+        if self.texture.get_locked():
+            return
+        try:
+            self.Surf.blit(self.fond, (0, 0))
+            self.Surf.blit(self.texture, (0, 0))
+        except pygame.error:
+            while self.texture.get_locked():
+                continue
+            self.Surf.blit(self.fond, (0, 0))
+            self.Surf.blit(self.texture, (0, 0))
+
+    def update_px(self, pixels, coo: coordinate):
         """
         Blit the pixel given on screen
+        :param pixels: Alpha channel of main texture
         :param coo: Coord du pixel
         """
         x, y = coo
         if not (0 <= x < self.dimensions[0] and 0 <= y < self.dimensions[1]):
             raise ValueError(x, y)
         if self.map[x][y]:
-            self.pixels[x, y] = self.texture[x, y]
+            pixels[x, y] = 255
         else:
-            self.pixels[x, y] = self.fond[x, y]
+            pixels[x, y] = 0
 
     def void_destruction_stack(self):
         """
@@ -411,6 +430,8 @@ class TileMap:
             self.reset_ONMAP_thread.start()
 
         self.__start_filter_image(head, queue)
+
+        Thread(group=None, target=self.update_texture, name=None).start()
 
     # @add_time_incache
     def __start_filter_image(self, head, queue):

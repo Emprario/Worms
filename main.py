@@ -31,7 +31,7 @@ tick = 0
 debug_switch = False
 fps = 0
 
-map.blit_texture()
+map.update_texture()
 
 all_sprites = pygame.sprite.Group()
 # obstacles = pygame.sprite.Group()
@@ -39,20 +39,20 @@ all_sprites = pygame.sprite.Group()
 run = True
 while run:
     destruction = ()
-    map.blit_texture()
+    # map.update_texture()
     SCREEN.blit(map.Surf, (0, 0))
     for event in pygame.event.get():
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_s:
                 debug_switch = not debug_switch
-                map.blit_texture(all_pxs=True)
+                map.update_texture(all_pxs=True)
             elif event.key == pygame.K_d:
                 get_time_incache()
                 print("Available :", map.available_ONMAPs)
                 print("To clean :", map.clear_ONMAPs)
             elif event.key == pygame.K_f:
                 map = TileMap(path)
-                map.blit_texture(all_pxs=True)
+                map.update_texture(all_pxs=True)
             elif event.key == pygame.K_ESCAPE:
                 run = False
 
@@ -88,12 +88,12 @@ while run:
     i = 0
     # bug actuel : out of range au bout de 10 sec environ
     while i < len(all_moves):
-        print(tick, [move[3] for move in all_moves])
+        # print(tick, [move[3] for move in all_moves])
         result = translation(*all_moves[i][:-2], tick - all_moves[i][-2])
         # print(result)
         all_moves[i][-3] = result[1]
         if result[0]:
-            print("Killed")
+            # print("Killed")
             all_moves[i][-1](*all_moves[i][:-1], result[2])
             del all_moves[i]
         else:
