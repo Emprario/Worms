@@ -31,7 +31,7 @@ tick = 0
 debug_switch = False
 fps = 0
 
-map.blit_texture(all_pxs=True)
+map.blit_texture()
 
 all_sprites = pygame.sprite.Group()
 # obstacles = pygame.sprite.Group()
@@ -39,13 +39,8 @@ all_sprites = pygame.sprite.Group()
 run = True
 while run:
     destruction = ()
-    if debug_switch:
-        map.print_map()
-    else:
-        map.blit_texture()
+    map.blit_texture()
     SCREEN.blit(map.Surf, (0, 0))
-    tt = (map.Surf, (0, 0))
-    SCREEN.blit(*tt)
     for event in pygame.event.get():
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_s:

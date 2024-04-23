@@ -8,6 +8,7 @@ Méthode de gestion de map : tilemap
 from functools import reduce
 from sys import setrecursionlimit
 from threading import Thread
+from numpy import array
 
 import pygame
 
@@ -38,6 +39,15 @@ def gen_segmented_map(vectmap: list[list[coordinate]]) -> list[list[coordinate]]
 
 def algo_peinture(segmap: list[list[coordinate]], fmap: list[list[bool]], centers: list[coordinate],
                   dim: list[int], base: bool = False):
+    """
+    "Peint" une surface fmap de la "couleur" `not base` à partir des points `centers` en se délimitant aux contours :
+    `segmap` dans le respect des dimensions implicites.
+    :param segmap: Une liste des contours à respecter
+    :param fmap: Le calque de la map
+    :param centers: Les points qui seront propagateurs
+    :param dim: Les dimensions
+    :param base: La couleur de fond de la map
+    """
     def fill_neighbours(point: coordinate, segform: set[coordinate]):
         # print(segform)
         fmap[point[0]][point[1]] = not base
@@ -62,16 +72,17 @@ class TileMap:
         :param mappath: Chemin (relatif depuis la root du projet) vers la map
         """
         self.map: list[list[bool]] = []  # [x][y]
-        self.texture: list[int] | None = None  # Invalid texture is None - debug // list[int] is bytes to print img
-        self.fond: list[int] | None = None
+        self.texture: array = None  # Invalid texture is None - debug // list[int] is bytes to print img
+        self.fond: array = None
+        # self.pxd_array: array = None
         self.dimensions: list[int] = [0, 0]
-        self.form_borders: list[list[coordinate]] = []
         self.destruction_stack: list[tuple[coordinate, float]] = []
         self.ONMAPs: dict[int, list[list[bool]]] = {i: [] for i in range(SIMULTANITY_THRESHOLD)}
         self.available_ONMAPs: [int] = []
         self.clear_ONMAPs: [int] = [i for i in range(SIMULTANITY_THRESHOLD)]
         self.reset_ONMAP_thread: Thread | None = None
-        self.px_update_list: set[int] = set()
+        self.px_update_list: set[tuple[int, int]] = set()
+        self.Surf: pygame.Surface | None = None
 
         # Step 1: Extract vectorial map
 
@@ -165,11 +176,11 @@ class TileMap:
                             else:
                                 if sp[0] == "empty":
                                     print("load fond")
-                                    self.fond = list(pygame.image.tobytes(pygame.image.load(sp[1]), 'ARGB'))
+                                    self.fond = pygame.surfarray.array3d(pygame.image.load(sp[1]))
                                 elif sp[0] == "full":
                                     print("load front")
                                     # pygame.image.tobytes returns [y] then [x]
-                                    self.texture = list(pygame.image.tobytes(pygame.image.load(sp[1]), 'ARGB'))
+                                    self.texture = pygame.surfarray.array3d(pygame.image.load(sp[1]))
 
         # print("VectMap chargé avec :")
         # print(self.dimensions)
@@ -183,28 +194,27 @@ class TileMap:
         while len(self.available_ONMAPs) < MIN_SIMULTANITY_THRESHOLD:
             continue
 
-        self.Surf = pygame.Surface((self.dimensions[0], self.dimensions[1]))
+        self.Surf = pygame.Surface(self.dimensions)
+        self.texture = pygame.surfarray.map_array(self.Surf, self.texture)
+        self.fond = pygame.surfarray.map_array(self.Surf, self.fond)
+        # self.pxd_array = self.texture.copy()
+
+        print("Array Copied !")
         ###   #####   ###
 
         # Step2: Obtain segmented map
 
-        self.form_borders: list[list[coordinate]] = gen_segmented_map(vectmap)
-
-        # more = {point for lstpoint in segmap for point in lstpoint}
-        # skelmap = [[(x,y) in more for y in range(self.dimensions[1])] for x in range(self.dimensions[0])]
-        # self.print_map(skelmap)
-
-        # print("Map à segments généré avec :")
-        # print(len(segmap) == len(vectmap))
-        # print(segmap)
-        # print(segmap[0])
-        # [show_point(point, does_stop=False) for form in segmap for point in form]
-        # print (have_duplicated_obj_in_list(segmap))
+        form_borders: list[list[coordinate]] = gen_segmented_map(vectmap)
 
         # Step 3: Fill the map !
         self.clear_map()
 
-        for form in self.form_borders:
+        """
+        Cette méthode de remplissage est optimisé ne sachant pas forcement le centre des formes.
+        La génération de la map s'effectue au début du programme pour rendre les fichiers de maps bien plus légés et 
+        pour permettre dans de futures mis-à-jours de générer des maps aléatoires plus facilements.
+        """
+        for form in form_borders:
 
             # Step 3.1 Order points by x then y in a dict
             # it's a set because 'in' operator in set is O(1) in python same for dicts
@@ -321,7 +331,7 @@ class TileMap:
                         elif x not in Hdict[y]:
                             self.map[x][y] = inside
 
-        self.__filter_image(0, len(self.texture), arbitrary=True)
+        self.__start_filter_image((0, 0), self.dimensions)
 
     def clear_map(self):
         """
@@ -331,49 +341,32 @@ class TileMap:
             [False for _ in range(self.dimensions[1])] for _ in range(self.dimensions[0])
         ]
 
-    def print_map(self):
-        """
-        Affiche la map dans un écran à part
-        Utilité pour le débugage
-        :param skelmap: La map à afficher
-        """
-        self.Surf.lock()
-        for x in range(self.dimensions[0]):
-            for y in range(self.dimensions[1]):
-                if self.map[x][y]:
-                    self.Surf.set_at((x, y), pygame.Color("red"))
-                else:
-                    self.Surf.set_at((x, y), pygame.Color("black"))
-        self.Surf.unlock()
-
     def blit_texture(self, *, all_pxs: bool = False):
         """
         Affiche la map dans le screen
         Utilise les textures internes
-        :param screen: Le screen qu'on doit blit dessus
+        :param all_pxs: Paramètre à placer en keyword, il force une actualisation de TOUS les pixels
         """
         if all_pxs:
-            self.Surf.blit(pygame.image.frombytes(bytes(self.fond), self.dimensions, 'ARGB'), (0, 0))
-            self.Surf.blit(pygame.image.frombytes(bytes(self.texture), self.dimensions, 'ARGB'), (0, 0))
-        else:
-            self.Surf.lock()
-            while len(self.px_update_list) > 0:
-                self.update_px(self.px_update_list.pop())
-            self.Surf.unlock()
+            self.__start_filter_image((0, 0), self.dimensions)
 
-    def update_px(self, idx: int) -> None:
+        self.pixels = pygame.surfarray.pixels2d(self.Surf)
+        while len(self.px_update_list) > 0:
+            self.update_px(self.px_update_list.pop())
+        del self.pixels
+
+    def update_px(self, coo: coordinate):
         """
         Blit the pixel given on screen
-        :param idx: Pixel index in self.texture (should point on Alpha channel)
-        :param screen: The screen to update
+        :param coo: Coord du pixel
         """
-        x, y = get_point_from_idx(idx)
-        if self.texture[idx] == 255:
-            self.Surf.set_at((x, y), self.texture[idx + 1:idx + 4])
-        elif self.texture[idx] == 0:
-            self.Surf.set_at((x, y), self.fond[idx + 1:idx + 4])
+        x, y = coo
+        if not (0 <= x < self.dimensions[0] and 0 <= y < self.dimensions[1]):
+            raise ValueError(x, y)
+        if self.map[x][y]:
+            self.pixels[x, y] = self.texture[x, y]
         else:
-            raise AttributeError("An alpha channel should be either 0 or 255")
+            self.pixels[x, y] = self.fond[x, y]
 
     def void_destruction_stack(self):
         """
@@ -399,89 +392,41 @@ class TileMap:
 
         seg_circle = gen_segmented_map([circle])
 
-        # for point in seg_circle[0]:
-        #     show_point(point, does_stop=False, one_pixel=True)
-        # show_point(impact, color=(0,0,255))
-
         while len(self.available_ONMAPs) == 0:
-            # print("Available :", self.available_ONMAPs)
-            # print("To clean :", self.clear_ONMAPs)
             continue
         AX = self.available_ONMAPs.pop()
 
         algo_peinture(seg_circle, self.ONMAPs[AX], [impact], self.dimensions, base=True)
 
-        # t1 = time()
         for x in range(xmini, xmaxi + 1):
             for y in range(ymini, ymaxi + 1):
                 self.map[x][y] = self.map[x][y] and self.ONMAPs[AX][x][y]
-        # t2 = time()
-        # print(t2 - t1)
 
         head = (xmini, ymini)
-        # queue = (xmaxi, ymaxi)
-        starter = (head[0] + head[1] * self.dimensions[0]) * 4
-        # goal = (queue[0] + queue[1] * self.dimensions[0]) * 4
-        # show_point(head, does_stop=False)
-        # show_point(queue)
+        queue = (xmaxi, ymaxi)
 
         self.clear_ONMAPs.append(AX)
         if not self.reset_ONMAP_thread.is_alive():
             self.reset_ONMAP_thread = Thread(group=None, target=self.__reset_ONMAP, name=None)
             self.reset_ONMAP_thread.start()
 
-        # self.tt = 0
-        parter = (xmaxi - xmini) * 4
-        # print(parter, goal, starter)
-        launch_dicts = [{'_from': starter + self.dimensions[0] * i * 4,
-                         '_to': starter + parter + self.dimensions[0] * (i + 1) * 4}
-                        for i in range(ymaxi - ymini)]
-        Thread(group=None, target=self.__start_filter_image, name=None, args=launch_dicts).start()
-        # for dlign in launch_dicts:
-        #     self.__filter_image(**dlign)
+        self.__start_filter_image(head, queue)
 
     # @add_time_incache
-    def __start_filter_image(self, *launch_dict: dict[str, int]) -> None:
-        for dict in launch_dict:
-            self.__filter_image(**dict)
-
-    def __filter_image(self, _from: int, _to: int, *, arbitrary: bool = False) -> None:
+    def __start_filter_image(self, head, queue):
         """
-        Filter the image to set alpha channel of hidden pixel to 0 and the other pixel to 1
-        :param _from: Start processing at px _from (included)
-        :param _to: Ends processing at px _to (excluded)
+        Envoie dans la liste d'update tous les pixels dans le rectangle head à queue
+        :param head: Premier point (en haut à gauche)
+        :param queue: Dernier point (en bas à droite)
         """
-        # print("go from", _from, "to", _to)
-        # t1 = time()
-        # Make sure we are interacting with images
-        assert self.texture != None
-        if arbitrary:
-            for idx in range(_from, _to, 4):  # Catch only alpha channels
-                # print((idx // 4) // self.dimensions[0], (idx // 4) // self.dimensions[1])
-                if self.map[(idx // 4) % self.dimensions[0]][(idx // 4) // self.dimensions[0]]:
-                    self.texture[idx] = 255
-                else:
-                    self.texture[idx] = 0
-        else:
-            for idx in range(_from, _to, 4):  # Catch only alpha channels
-                x, y = (idx // 4) % self.dimensions[0], (idx // 4) // self.dimensions[0]
-                if (
-                        self.map[x][y]
-                        and self.texture[idx] != 255
-                ):
-                    self.texture[idx] = 255
-                    self.px_update_list.add(idx)
-                elif (
-                        not self.map[x][y]
-                        and self.texture[idx] != 0
-                ):
-                    self.texture[idx] = 0
-                    self.px_update_list.add(idx)
-
-        # t2 = time()
-        # self.tt += t2 - t1
+        for x in range(head[0], queue[0]):
+            for y in range(head[1], queue[1]):
+                self.px_update_list.add((x, y))
 
     def __reset_ONMAP(self):
+        """
+        Reset les caches de l'écriture de la map 1 à 1
+        """
         while len(self.clear_ONMAPs) > 0:
             AX = self.clear_ONMAPs.pop()
             # self.ONMAPs[AX] = deepcopy(self.TRUEMAP)
