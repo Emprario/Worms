@@ -356,12 +356,14 @@ class TileMap:
             self.Surf.blit(pygame.image.frombytes(bytes(self.fond), self.dimensions, 'ARGB'), (0, 0))
             self.Surf.blit(pygame.image.frombytes(bytes(self.texture), self.dimensions, 'ARGB'), (0, 0))
         else:
-            self.Surf.lock()
+            # self.Surf.lock()
+            pxarray = pygame.surfarray.pixels2d(self.Surf)
             while len(self.px_update_list) > 0:
-                self.update_px(self.px_update_list.pop())
-            self.Surf.unlock()
+                self.update_px(pxarray, self.px_update_list.pop())
+            del pxarray
+            # self.Surf.unlock()
 
-    def update_px(self, idx: int) -> None:
+    def update_px(self, pxarray, idx: int) -> None:
         """
         Blit the pixel given on screen
         :param idx: Pixel index in self.texture (should point on Alpha channel)
@@ -369,11 +371,14 @@ class TileMap:
         """
         x, y = get_point_from_idx(idx)
         if self.texture[idx] == 255:
-            self.Surf.set_at((x, y), self.texture[idx + 1:idx + 4])
+            # self.Surf.set_at((x, y), self.texture[idx + 1:idx + 4])
+            r, g, b = self.texture[idx + 1:idx + 4]
         elif self.texture[idx] == 0:
-            self.Surf.set_at((x, y), self.fond[idx + 1:idx + 4])
+            # self.Surf.set_at((x, y), self.fond[idx + 1:idx + 4])
+            r, g, b = self.fond[idx + 1:idx + 4]
         else:
             raise AttributeError("An alpha channel should be either 0 or 255")
+        pxarray[x, y] = (r * 256 * 256) + (g * 256) + b
 
     def void_destruction_stack(self):
         """
