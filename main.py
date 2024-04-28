@@ -104,7 +104,18 @@ while run:
         else:
             i += 1
 
-    pygame.display.flip()
+    #------------- Worms part ---------------------
+    x_movement = 0
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_LEFT]:
+        x_movement = -2
+    if keys[pygame.K_RIGHT]:
+        x_movement = 2
+    player.move_worm(x_movement, 0, map.map)
+    player.draw(SCREEN)
+    #----------------------------------------------
+    
+        pygame.display.flip()
     Oclock.tick(FRAMERATE)
     tick += 1
 
