@@ -32,6 +32,7 @@ class Worm(Entity):
 
 
 
+
     def move_worm(self, x_axis, y_axis, map):
         """
         Permet de déplacer le worm dans les deux directions
@@ -48,16 +49,18 @@ class Worm(Entity):
 
         bottomY = self.y + 80
 
-        if not map[self.x+62][bottomY+1]:
+        if not map[self.x+62+x_axis][bottomY+1]:
             self.y += 2
         else:
             index = 0
             for i in range(1,len(map[0])):
-                if map[self.x+62][i] and not map[self.x+62][i-1]:
+                if map[self.x+62+x_axis][i] and not map[self.x+62+x_axis][i-1]:
                     if abs(i - bottomY) < abs(index - bottomY):
                         index = i
-            self.y += index-bottomY
-            self.x += x_axis
+            if (index-bottomY) > -3:
+                self.y += index-bottomY
+                self.x += x_axis
+
         """ pour le deplacement sur les surface inclinés: prendre la colone
         pixel à droite ou gauch (selon le input), parcourir cet colone pour trouver
         les points de contour (les pixel True apres un false). Ensuite faire la différence
