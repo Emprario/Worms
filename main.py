@@ -14,6 +14,7 @@ from utils import get_circle
 from CONSTS import FRAMERATE
 from physics import all_moves, translation
 from weapon import Projectile
+from worms import Worm
 
 pygame.init()
 
@@ -35,6 +36,8 @@ map.blit_texture(all_pxs=True)
 
 all_sprites = pygame.sprite.Group()
 # obstacles = pygame.sprite.Group()
+
+player = Worm(0,680,358)
 
 run = True
 while run:
@@ -111,11 +114,11 @@ while run:
         x_movement = -2
     if keys[pygame.K_RIGHT]:
         x_movement = 2
-    player.move_worm(x_movement, 0, map.map)
+    player.move_worm(x_movement, 0, map.map, all_moves, tick)
     player.draw(SCREEN)
     #----------------------------------------------
     
-        pygame.display.flip()
+    pygame.display.flip()
     Oclock.tick(FRAMERATE)
     tick += 1
 
