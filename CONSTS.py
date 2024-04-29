@@ -12,7 +12,6 @@ class OnLoadMapError(Exception):
 
 
 # Constantes
-
 coordinate = tuple[int, int]
 DEFAULT_DENSITY = 20
 MAX_THREAD_BY_CALC = 1
