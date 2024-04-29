@@ -1,7 +1,19 @@
 """
 Point d'entrée dans le programme
-Ce module devra également contenir
-    - Les instructions pour lancer la boucle principale (dans game_engine.MaitreDuJeu)
+Ce module est divisé en trois partie
+    * Importation des modules externes puis internes
+    * Initialisation
+    * Boucle Principale
+
+La boucle principale est elle-même composé des  éléments suivants
+    * Affichage de la map
+    * Capture et réactions des events
+    * Affichage des sprites
+    * Vidage du stack des explosions
+    * Execution des mouvements
+    * Gestions des worms
+    * Flip de l'écran
+    * Calcul du framerate
 """
 from threading import Thread
 
@@ -47,8 +59,8 @@ while run:
     else:
         map.blit_texture()
     SCREEN.blit(map.Surf, (0, 0))
-    tt = (map.Surf, (0, 0))
-    SCREEN.blit(*tt)
+    # tt = (map.Surf, (0, 0))
+    # SCREEN.blit(*tt))
     for event in pygame.event.get():
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_s:
