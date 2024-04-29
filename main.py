@@ -1,7 +1,19 @@
 """
 Point d'entrée dans le programme
-Ce module devra également contenir
-    - Les instructions pour lancer la boucle principale (dans game_engine.MaitreDuJeu)
+Ce module est divisé en trois partie
+    * Importation des modules externes puis internes
+    * Initialisation
+    * Boucle Principale
+
+La boucle principale est elle-même composé des  éléments suivants
+    * Affichage de la map
+    * Capture et réactions des events
+    * Affichage des sprites
+    * Vidage du stack des explosions
+    * Execution des mouvements
+    * Gestions des worms
+    * Flip de l'écran
+    * Calcul du framerate
 """
 from threading import Thread
 
@@ -18,6 +30,8 @@ from weapon import Bazooka
 from weapon import Pro_sniper
 from weapon import Pro_grenade
 from weapon import Pro_frag_grenade
+from worms import Worm
+
 pygame.init()
 
 path = "assets/map/01.map"
@@ -42,6 +56,8 @@ actual_weapon = 0
 inclinaison= 0.0
 power = 0.1
 
+# player = Worm(0,680,358)
+
 run = True
 while run:
     destruction = ()
@@ -50,9 +66,7 @@ while run:
     else:
         map.blit_texture()
     SCREEN.blit(map.Surf, (0, 0))
-    tt = (map.Surf, (0, 0))
-    SCREEN.blit(*tt)
-
+    
     bazooka = Bazooka(map.dimensions[0] // 2, map.dimensions[1] // 2, "assets/textures/Bazooka.png", 0)
     all_sprites.add(bazooka)
 
@@ -151,6 +165,17 @@ while run:
         else:
             i += 1
 
+    #------------- Worms part ---------------------
+    # x_movement = 0
+    # keys = pygame.key.get_pressed()
+    # if keys[pygame.K_LEFT]:
+    #     x_movement = -2
+    # if keys[pygame.K_RIGHT]:
+    #     x_movement = 2
+    # player.move_worm(x_movement, 0, map.map, all_moves, tick)
+    # player.draw(SCREEN)
+    #----------------------------------------------
+    
     pygame.display.flip()
     Oclock.tick(FRAMERATE)
     tick += 1

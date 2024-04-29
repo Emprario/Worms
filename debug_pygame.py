@@ -1,3 +1,6 @@
+"""
+Outils de debug pour pygame
+"""
 import pygame
 
 SIZE = (1920, 1080)

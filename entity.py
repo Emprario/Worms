@@ -1,3 +1,10 @@
+"""
+Entitée de la base de pour la gestion du jeux,
+    * Elle possède des propriétés élémentaires : des coordonéées réelles et entière
+    * Une fonction d'update de coordonées entières à partir des coordonées réelles
+    * Des fonctions de déplacements via vecteur vitesse
+    * Une fonction pour obtenir la vitesse actuelle
+"""
 import pygame
 
 from math import cos, sin
