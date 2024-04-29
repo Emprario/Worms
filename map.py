@@ -72,6 +72,7 @@ class TileMap:
         self.clear_ONMAPs: [int] = [i for i in range(SIMULTANITY_THRESHOLD)]
         self.reset_ONMAP_thread: Thread | None = None
         self.px_update_list: set[int] = set()
+        self.Surf = None
 
         # Step 1: Extract vectorial map
 

@@ -31,6 +31,8 @@ from weapon import Pro_sniper
 from weapon import Pro_grenade
 from weapon import Pro_frag_grenade
 from worms import Worm
+from math import pi
+from weapon import  Charg_bar
 
 pygame.init()
 
@@ -53,10 +55,15 @@ map.blit_texture(all_pxs=True)
 all_sprites = pygame.sprite.Group()
 
 actual_weapon = 0
-inclinaison= 0.0
+inclinaison = 0.0
 power = 0.1
 
 # player = Worm(0,680,358)
+
+bazooka = Bazooka((map.dimensions[0] // 2)-30, (map.dimensions[1] // 2)-30, "assets/textures/Bazooka.png", -30)
+all_sprites.add(bazooka)
+charg_bar = Charg_bar((map.dimensions[0] // 2)-30, (map.dimensions[1] // 2)-60)
+all_sprites.add(charg_bar)
 
 run = True
 while run:
@@ -66,9 +73,6 @@ while run:
     else:
         map.blit_texture()
     SCREEN.blit(map.Surf, (0, 0))
-    
-    bazooka = Bazooka(map.dimensions[0] // 2, map.dimensions[1] // 2, "assets/textures/Bazooka.png", 0)
-    all_sprites.add(bazooka)
 
     for event in pygame.event.get():
         if event.type == pygame.KEYDOWN:
@@ -85,49 +89,54 @@ while run:
             elif event.key == pygame.K_ESCAPE:
                 run = False
             elif event.key == pygame.K_e:
-                if actual_weapon<=2:
+                if actual_weapon <= 2:
                     actual_weapon += 1
                 else:
                     actual_weapon = 0
             elif event.key == pygame.K_UP:
                 inclinaison -= 0.1
-                bazooka.rotate(50)
+                bazooka.rotate(0.1*360/(2*pi))
             elif event.key == pygame.K_DOWN:
                 inclinaison += 0.1
+                bazooka.rotate(-0.1 * 360 / (2 * pi))
             elif event.key == pygame.K_SPACE:
-                if actual_weapon == 1 :
-                    pro_sniper = Pro_sniper(map.dimensions[0]// 2, map.dimensions[1]//2, "", map.destruction_stack)
+                if actual_weapon == 1:
+                    pro_sniper = Pro_sniper(map.dimensions[0] // 2, map.dimensions[1] // 2, "", map.destruction_stack,25, 5, False)
                     all_sprites.add(pro_sniper)
-                    pro_sniper.add_to_move(all_moves, map.map, tick, inclinaison,1)
+                    pro_sniper.add_to_move(all_moves, map.map, tick, inclinaison, 1)
                     pro_sniper.launched = True
                     print("missile launched")
 
                 if actual_weapon == 0 or actual_weapon == 2 or actual_weapon == 3:
-                    power = -tick*0.01
-
+                    power = -tick * 0.015
+                    charg_bar.agrandissement = True
+                    charge = power
+                    charg_bar.up_taille(10)
 
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_SPACE:
-                power += tick * 0.01 +0.2
-                if power>1 :
-                    power =1
-                if actual_weapon == 0 :
-                    pro_bazooka = Pro_bazooka(map.dimensions[0]// 2, map.dimensions[1]//2, "", map.destruction_stack)
+                power += tick * 0.015 + 0.2
+                if power > 1:
+                    power = 1
+                if actual_weapon == 0:
+                    pro_bazooka = Pro_bazooka(map.dimensions[0] // 2, map.dimensions[1] // 2, "", map.destruction_stack,12,20,False)
                     all_sprites.add(pro_bazooka)
-                    pro_bazooka.add_to_move(all_moves, map.map, tick, inclinaison,power)
+                    pro_bazooka.add_to_move(all_moves, map.map, tick, inclinaison, power)
                     pro_bazooka.launched = True
-                elif actual_weapon == 2 :
-                    pro_grenade = Pro_grenade(map.dimensions[0]// 2, map.dimensions[1]//2, "", map.destruction_stack)
+                elif actual_weapon == 2:
+                    pro_grenade = Pro_grenade(map.dimensions[0] // 2, map.dimensions[1] // 2, "", map.destruction_stack,7, 10, True)
                     all_sprites.add(pro_grenade)
-                    pro_grenade.add_to_move(all_moves, map.map, tick, inclinaison,power)
+                    pro_grenade.add_to_move(all_moves, map.map, tick, inclinaison, power)
                     pro_grenade.launched = True
-                elif actual_weapon == 3 :
-                    pro_frag_grenade = Pro_frag_grenade(map.dimensions[0]// 2, map.dimensions[1]//2, "", map.destruction_stack)
+                elif actual_weapon == 3:
+                    pro_frag_grenade = Pro_frag_grenade(map.dimensions[0] // 2, map.dimensions[1] // 2, "",map.destruction_stack, 7,10,True)
                     all_sprites.add(pro_frag_grenade)
-                    pro_frag_grenade.add_to_move(all_moves, map.map, tick,inclinaison,power)
+                    pro_frag_grenade.add_to_move(all_moves, map.map, tick, inclinaison, power)
                     pro_frag_grenade.launched = True
-                power = 1
+                power = 0.2
                 print("missile launched")
+                charg_bar.agrandissement=False
+                charg_bar.reset_taille()
 
         elif event.type == pygame.MOUSEBUTTONDOWN:
             print("Mouse point @", pygame.mouse.get_pos())
@@ -148,6 +157,11 @@ while run:
         # print(sprite.x, sprite.y)
         SCREEN.blit(sprite.image, (sprite.x, sprite.y))
 
+    if charg_bar.agrandissement == True:
+        charge = power + tick * 0.015 + 0.2
+        if charge < 1:
+            charg_bar.up_taille(3)
+
 
 
     map.void_destruction_stack()
@@ -165,7 +179,7 @@ while run:
         else:
             i += 1
 
-    #------------- Worms part ---------------------
+    # ------------- Worms part ---------------------
     # x_movement = 0
     # keys = pygame.key.get_pressed()
     # if keys[pygame.K_LEFT]:
@@ -174,8 +188,8 @@ while run:
     #     x_movement = 2
     # player.move_worm(x_movement, 0, map.map, all_moves, tick)
     # player.draw(SCREEN)
-    #----------------------------------------------
-    
+    # ----------------------------------------------
+
     pygame.display.flip()
     Oclock.tick(FRAMERATE)
     tick += 1
