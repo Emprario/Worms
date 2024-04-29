@@ -42,13 +42,13 @@ player = Worm(0,680,358)
 run = True
 while run:
     destruction = ()
+
     if debug_switch:
         map.print_map()
     else:
         map.blit_texture()
     SCREEN.blit(map.Surf, (0, 0))
-    tt = (map.Surf, (0, 0))
-    SCREEN.blit(*tt)
+
     for event in pygame.event.get():
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_s:
@@ -80,28 +80,21 @@ while run:
             pygame.quit()
             exit(1)
 
-    # Upadte dezs sprites
+    # Upadte des sprites
     for sprite in all_sprites:
-        # if isinstance(projectile, Projectile) and projectile.launched:
-        #     collisions = pygame.sprite.spritecollide(projectile, obstacles, True)
-        #     if collisions:
-        #         projectile.kill()
-        # Affichage
-        # print(sprite.x, sprite.y)
         SCREEN.blit(sprite.image, (sprite.x, sprite.y))
 
-
-
+    # Execution des explosions
     map.void_destruction_stack()
+
     i = 0
-    # bug actuel : out of range au bout de 10 sec environ
     while i < len(all_moves):
         print(tick, [move[3] for move in all_moves])
         result = translation(*all_moves[i][:-2], tick - all_moves[i][-2])
         # print(result)
         all_moves[i][-3] = result[1]
         if result[0]:
-            print("Killed")
+            print("I: Killed")
             all_moves[i][-1](*all_moves[i][:-1], result[2])
             del all_moves[i]
         else:
