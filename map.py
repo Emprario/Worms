@@ -336,6 +336,27 @@ class TileMap:
             continue
         self.__filter_image(0, len(self.texture), arbitrary=True)
 
+    def __getitem__(self, item: coordinate) -> bool:
+        if (
+                type(item) != tuple or len(item) != 2 or type(item[0]) != int or type(item[1]) != int
+                or item[0] < 0 or item[0] >= self.dimensions[0] or item[1] < 0 or item[1] >= self.dimensions[1]
+        ):
+            raise ValueError
+        return self.map[item[0]][item[1]]
+
+    def __setitem__(self, item: coordinate, value: bool):
+        if (
+                type(item) != tuple or len(item) != 2 or type(item[0]) != int or type(item[1]) != int
+                or type(value) != bool
+                or item[0] < 0 or item[0] >= self.dimensions[0] or item[1] < 0 or item[1] >= self.dimensions[1]
+        ):
+            raise ValueError
+        self.map[item[0]][item[1]] = value
+
+
+    def get_dimensions(self):
+        return self.dimensions.copy()
+
     def clear_map(self):
         """
         Method to clear the actual map
