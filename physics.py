@@ -1,8 +1,10 @@
 from entity import Entity
-from CONSTS import coordinate, MILITICK
+from CONSTS import coordinate
 from utils import get_full_line
 from typing import Callable
 from functools import reduce
+
+MILITICK = 50
 
 all_moves: list[list[float, float, list[list[bool]], Entity, bool, int, Callable]] = list()
 
@@ -10,7 +12,7 @@ all_moves: list[list[float, float, list[list[bool]], Entity, bool, int, Callable
 """
 fall: Callable = fall_damage
 
-def fall_damage(velocity: float, cst: int):     
+def fall_damage(velocity: float, cst: int):
     if velocity > cst:
         return (velocity-cst) * x  # x to define -> depend on player max HP
 """
@@ -19,7 +21,14 @@ def fall_damage(velocity: float, cst: int):
 def translation(v_init: float, alpha: float, map: list[list[bool]], entity: Entity, force: bool, local_tick: int
                 ) -> tuple[bool, bool, None | float]:
     """
-    si quelqu'un trouve un bug sachez que vous pouvez me trouver au cimetière
+    Calcul la position d'une Entity au prochain tick
+    :param v_init: Vistesse initiale
+    :param alpha: angle en radian (sens direct)
+    :param map: map sous le format de Map.map
+    :param entity: Entity qui va être modifié
+    :param force: Décrit si on est dans la phase initiale de décolage du saut
+    :param local_tick: Tick initiale (tick au moment du départ i.e. ce n'est pas zéro)
+    :return: tuple (Arrêt du mouvment, sommes nous dans un mode de force ?, vitesse à l'impact si impact sinon None)
     """
     prox = reduce(lambda pre, nex: pre or nex,
                   [map[entity.x + X][entity.y + Y] for X in range(-1, 2) for Y in range(-1, 2)]

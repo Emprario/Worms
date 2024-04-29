@@ -1,13 +1,13 @@
 import pygame
 
 from entity import Entity
-from math import pi
+
 
 # path = "assets/map/01.map"
 # map = TileMap(path)
 
 # flags = pygame.FULLSCREEN | pygame.HWSURFACE
-#SCREEN = pygame.display.set_mode(map.dimensions, flags)
+# SCREEN = pygame.display.set_mode(map.dimensions, flags)
 
 
 # WHITE = (255, 255, 255)
@@ -27,9 +27,8 @@ class Projectile(Entity):
     def destroy(self, *args):
         pass
 
-    # all_moves: list[list[float, float, list[list[bool]], Entity, bool, int, Callable]] = list()
-    def add_to_move(self, movelst: list, map: list[list[bool]], tick: int):
-        movelst.append([50, 0, map, self, True, tick, self.destroy])
+    def add_to_move(self, movelst: list, map: list[list[bool]]):
+        movelst.append([50, 0, map, self, True, 0, self.destroy])
 
 
 """    def update(self):
@@ -37,7 +36,6 @@ class Projectile(Entity):
             self.rect.x += self.speed
             if self.rect.left > map.dimensions:
                 self.kill()"""
-
 
 """class Obstacle(pygame.sprite.Sprite):
     def __init__(self, x, y):
@@ -47,13 +45,10 @@ class Projectile(Entity):
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)"""
 
-
-
-
 # Création des obstacles
-#obstacle = Obstacle(screen_width - 100, screen_height // 2)
-#all_sprites.add(obstacle)
-#obstacles.add(obstacle)
+# obstacle = Obstacle(screen_width - 100, screen_height // 2)
+# all_sprites.add(obstacle)
+# obstacles.add(obstacle)
 
 """
 running = True
@@ -74,23 +69,22 @@ while running:
             collisions = pygame.sprite.spritecollide(projectile, obstacles, True)
             if collisions:
                 projectile.kill()
-                
+
 """
 
-    
-    #all_sprites.update()
+# all_sprites.update()
 
-    
-    #screen.fill(BLACK)
 
-    
-    #all_sprites.draw(screen)
+# screen.fill(BLACK)
 
-    
-    #pygame.display.flip()
 
-    
-    #pygame.time.Clock().tick(60)
+# all_sprites.draw(screen)
+
+
+# pygame.display.flip()
+
+
+# pygame.time.Clock().tick(60)
 
 
 

@@ -37,7 +37,8 @@ map.blit_texture(all_pxs=True)
 all_sprites = pygame.sprite.Group()
 # obstacles = pygame.sprite.Group()
 
-player = Worm(0,680,358)
+#player = Worm(0,732,428)
+player = Worm(0,517,163)
 
 run = True
 while run:
@@ -67,7 +68,7 @@ while run:
             elif event.key == pygame.K_SPACE:
                 projectile = Projectile(map.dimensions[0]// 2, map.dimensions[1]//2, "")
                 all_sprites.add(projectile)
-                projectile.add_to_move(all_moves, map.map, tick)
+                projectile.add_to_move(all_moves, map.map)
                 projectile.launched = True
                 print("missile launched")
 
@@ -80,32 +81,6 @@ while run:
             pygame.quit()
             exit(1)
 
-    # Upadte dezs sprites
-    for sprite in all_sprites:
-        # if isinstance(projectile, Projectile) and projectile.launched:
-        #     collisions = pygame.sprite.spritecollide(projectile, obstacles, True)
-        #     if collisions:
-        #         projectile.kill()
-        # Affichage
-        # print(sprite.x, sprite.y)
-        SCREEN.blit(sprite.image, (sprite.x, sprite.y))
-
-
-
-    map.void_destruction_stack()
-    i = 0
-    # bug actuel : out of range au bout de 10 sec environ
-    while i < len(all_moves):
-        print(tick, [move[3] for move in all_moves])
-        result = translation(*all_moves[i][:-2], tick - all_moves[i][-2])
-        # print(result)
-        all_moves[i][-3] = result[1]
-        if result[0]:
-            print("Killed")
-            all_moves[i][-1](*all_moves[i][:-1], result[2])
-            del all_moves[i]
-        else:
-            i += 1
 
     #------------- Worms part ---------------------
     x_movement = 0
@@ -117,7 +92,34 @@ while run:
     player.move_worm(x_movement, 0, map.map, all_moves, tick)
     player.draw(SCREEN)
     #----------------------------------------------
-    
+
+    # Upadte dezs sprites
+    for sprite in all_sprites:
+        # if isinstance(projectile, Projectile) and projectile.launched:
+        #     collisions = pygame.sprite.spritecollide(projectile, obstacles, True)
+        #     if collisions:
+        #         projectile.kill()
+        # Affichage
+        print(sprite.x, sprite.y)
+        SCREEN.blit(sprite.image, (sprite.x, sprite.y))
+
+
+
+    map.void_destruction_stack()
+
+    # def translation(v_init: float, alpha: float, map: list[list[bool]], point0: coordinate, entity: Entity,
+    #             force: bool, local_tick: int) -> tuple[bool, bool, None | float]:
+    #
+    # all_moves: list[list[float, float, list[list[bool]], coordinate, Entity, bool, int, Callable]] = list()
+    print("Amount of moves : ", len(all_moves))
+    for i in range(len(all_moves)):
+        print(all_moves[i][-4])
+        result = translation(*all_moves[i][:-1])
+        all_moves[i][-3] = result[1]
+        if not result[0]:
+            all_moves[i][-1](*all_moves[i][:-1], result[2])
+            del all_moves[i]
+
     pygame.display.flip()
     Oclock.tick(FRAMERATE)
     tick += 1

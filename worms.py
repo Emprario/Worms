@@ -40,39 +40,42 @@ class Worm(Entity):
         :param x_axis: Type(int) gauche à droite
         :param y_axis: Type(int) haut à bas
         """
+        # print("DEBUG X Y", self.x, self.y)
 
         #--------
         if self.is_on_ground:
         #--------
 
-            bottomY = self.y + 80
+
 
             # mvt vers le bas
-            if not map[self.x+62+x_axis][bottomY+1]:
-                self.y += 2
-                for i in range(bottomY, len(map[0])):
-                    if map[self.x + 62 + x_axis][i]:
+            if not map[self.x+x_axis][self.y+1]:
+                for i in range(self.y, len(map[0])):
+                    if map[self.x + x_axis][i]:
                         break
                 print(abs(self.y-i))
 
                 #--------------
-                if abs(self.y-i) > 30:
-                    # def translation(v_init: float, alpha: float, map: list[list[bool]], point0: coordinate, entity: Entity,
-                    #             force: bool, local_tick: int) -> tuple[bool, bool, None | float]:
-                    #
-                    # all_moves: list[list[float, float, list[list[bool]], coordinate, Entity, bool, int, Callable]] = list()
-                    all_moves.append([0, -pi/2, map, self, True, tick, self.fall_damage])
+                if abs(self.y-i) > 20:
+                    # def translation(v_init: float, alpha: float, map: list[list[bool]], entity: Entity, force: bool,
+                    #                 local_tick: int
+                    #                 ) -> tuple[bool, bool, None | float]:
+                    # list[list[float, float, list[list[bool]], coordinate, Entity, bool, int, Callable]]
+                    print("BEFORE : ", (self.x, self.y))
+                    all_moves.append([0, pi/2, map, self, True, 0, self.fall_damage])
                     self.is_on_ground = False
                 #-------------
+                else:
+                    self.y += 2
             # mvt lattéral
             else:
                 index = 0
-                for i in range(1,len(map[0])):
-                    if map[self.x+62+x_axis][i] and not map[self.x+62+x_axis][i-1]:
-                        if abs(i - bottomY) < abs(index - bottomY):
+                for i in range(1, len(map[0])):
+                    if map[self.x+x_axis][i] and not map[self.x+x_axis][i-1]:
+                        if abs(i - self.y) < abs(index - self.y):
                             index = i
-                if (index-bottomY) > -3:
-                    self.y += index-bottomY
+                if (index-self.y) > -3:
+                    self.y += index-self.y
                     self.x += x_axis
 
         """ pour le deplacement sur les surface inclinés: prendre la colone
@@ -100,11 +103,14 @@ class Worm(Entity):
                 self.is_on_ground = True
 
     def draw(self, screen):
-        screen.blit(self.image, (self.x, self.y))
+        # screen.blit(self.image, (self.x-62, self.y-80))
+        [screen.set_at((self.x + X, self.y + Y), "red") for X in range(-1, 2) for Y in range(-1, 2)]
+        # screen.set_at((self.x, self.y), "red")
 
     def pg_blit(self, surface: pygame.Surface):
         """Pygame Blit : Fonction d'affichage spécifique au worm"""
         pass
 
     def fall_damage(self, *args):
+        print("END CALLBACK")
         self.is_on_ground = True
