@@ -17,6 +17,11 @@ def fall_damage(velocity: float, cst: int):
         return (velocity-cst) * x  # x to define -> depend on player max HP
 """
 
+def addtomove(append: list[float, float, list[list[bool]], Entity, bool, int, Callable]):
+    # print(append[3])
+    # print(append[3].x, append[3].y, append[3].rx, append[3].ry)
+    append[3].synchroniseXY()
+    all_moves.append(append)
 
 def translation(v_init: float, alpha: float, map: list[list[bool]], entity: Entity, force: bool, local_tick: int
                 ) -> tuple[bool, bool, None | float]:
@@ -61,6 +66,8 @@ def translation(v_init: float, alpha: float, map: list[list[bool]], entity: Enti
 
                 entity.x, entity.y = impact
                 break
+
         return False, force, None
+
     x, y = entity.get_speed(local_tick, v_init, alpha)
     return True, force, (x ** 2 + y ** 2) ** 0.5

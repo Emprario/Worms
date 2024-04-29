@@ -38,7 +38,7 @@ all_sprites = pygame.sprite.Group()
 # obstacles = pygame.sprite.Group()
 
 #player = Worm(0,732,428)
-player = Worm(0,517,163)
+player = Worm(0, 517, 163)
 
 run = True
 while run:
@@ -48,8 +48,7 @@ while run:
     else:
         map.blit_texture()
     SCREEN.blit(map.Surf, (0, 0))
-    tt = (map.Surf, (0, 0))
-    SCREEN.blit(*tt)
+
     for event in pygame.event.get():
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_s:

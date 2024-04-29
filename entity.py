@@ -25,6 +25,9 @@ class Entity(pygame.sprite.Sprite):
     def update_co_from_rco(self):
         self.x, self.y = int(round(self.rx)), int(round(self.ry))
 
+    def synchroniseXY(self):
+        self.rx, self.ry = self.x, self.y
+
     def move_to(self, t, v0, alpha, mod):
         self.ry += mod * (G * t + v0 * sin(alpha))
         self.rx += mod * v0 * cos(alpha)

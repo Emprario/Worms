@@ -1,6 +1,7 @@
 import pygame
 from entity import Entity
 from math import pi
+from physics import addtomove
 
 """Il faut changer l'apel de moveworms dans main, appel de la fonction à chaque frame"""
 
@@ -46,12 +47,11 @@ class Worm(Entity):
         if self.is_on_ground:
         #--------
 
-
-
+            self.x += x_axis
             # mvt vers le bas
             if not map[self.x+x_axis][self.y+1]:
                 for i in range(self.y, len(map[0])):
-                    if map[self.x + x_axis][i]:
+                    if map[self.x][i]:
                         break
                 print(abs(self.y-i))
 
@@ -62,7 +62,7 @@ class Worm(Entity):
                     #                 ) -> tuple[bool, bool, None | float]:
                     # list[list[float, float, list[list[bool]], coordinate, Entity, bool, int, Callable]]
                     print("BEFORE : ", (self.x, self.y))
-                    all_moves.append([0, pi/2, map, self, True, 0, self.fall_damage])
+                    addtomove([15, pi/2, map, self, True, 0, self.fall_damage])
                     self.is_on_ground = False
                 #-------------
                 else:
@@ -71,12 +71,11 @@ class Worm(Entity):
             else:
                 index = 0
                 for i in range(1, len(map[0])):
-                    if map[self.x+x_axis][i] and not map[self.x+x_axis][i-1]:
+                    if map[self.x][i] and not map[self.x][i-1]:
                         if abs(i - self.y) < abs(index - self.y):
                             index = i
                 if (index-self.y) > -3:
                     self.y += index-self.y
-                    self.x += x_axis
 
         """ pour le deplacement sur les surface inclinés: prendre la colone
         pixel à droite ou gauch (selon le input), parcourir cet colone pour trouver
@@ -103,8 +102,8 @@ class Worm(Entity):
                 self.is_on_ground = True
 
     def draw(self, screen):
-        # screen.blit(self.image, (self.x-62, self.y-80))
-        [screen.set_at((self.x + X, self.y + Y), "red") for X in range(-1, 2) for Y in range(-1, 2)]
+        screen.blit(self.image, (self.x-62, self.y-80))
+        # [screen.set_at((self.x + X, self.y + Y), "red") for X in range(-1, 2) for Y in range(-1, 2)]
         # screen.set_at((self.x, self.y), "red")
 
     def pg_blit(self, surface: pygame.Surface):
