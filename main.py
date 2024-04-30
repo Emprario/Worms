@@ -58,7 +58,7 @@ actual_weapon = 0
 inclinaison = 0.0
 power = 0.1
 
-# player = Worm(0,680,358)
+player = Worm(0,680,358)
 
 bazooka = Bazooka((map.dimensions[0] // 2)-30, (map.dimensions[1] // 2)-30, "assets/textures/Bazooka.png", -30)
 all_sprites.add(bazooka)
@@ -174,17 +174,17 @@ while run:
         else:
             i += 1
 
-    # ------------- Worms part ---------------------
-    # x_movement = 0
-    # keys = pygame.key.get_pressed()
-    # if keys[pygame.K_LEFT]:
-    #     x_movement = -2
-    # if keys[pygame.K_RIGHT]:
-    #     x_movement = 2
-    # player.move_worm(x_movement, 0, map.map, all_moves, tick)
-    # player.draw(SCREEN)
-    # ----------------------------------------------
-
+    #------------- Worms part ---------------------
+    x_movement = 0
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_LEFT]:
+        x_movement = -2
+    if keys[pygame.K_RIGHT]:
+        x_movement = 2
+    player.move_worm(x_movement, 0, map.map, all_moves, tick)
+    player.draw(SCREEN)
+    #----------------------------------------------
+    
     pygame.display.flip()
     Oclock.tick(FRAMERATE)
     tick += 1
