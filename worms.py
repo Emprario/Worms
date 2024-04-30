@@ -1,6 +1,7 @@
 import pygame
 from entity import Entity
 from math import pi
+from physics import addtomove
 
 """Il faut changer l'apel de moveworms dans main, appel de la fonction à chaque frame"""
 
@@ -41,17 +42,16 @@ class Worm(Entity):
         :param y_axis: Type(int) haut à bas
         """
 
-        #--------
         if self.is_on_ground:
-        #--------
 
-            bottomY = self.y + 80
+            self.x += x_axis
+
 
             # mvt vers le bas
-            if not map[self.x+62+x_axis][bottomY+1]:
+            if not map[self.x][self.y+1]:
                 self.y += 2
-                for i in range(bottomY, len(map[0])):
-                    if map[self.x + 62 + x_axis][i]:
+                for i in range(self.y, len(map[0])):
+                    if map[self.x][i]:
                         break
                 print(abs(self.y-i))
 
@@ -61,19 +61,18 @@ class Worm(Entity):
                     #             force: bool, local_tick: int) -> tuple[bool, bool, None | float]:
                     #
                     # all_moves: list[list[float, float, list[list[bool]], coordinate, Entity, bool, int, Callable]] = list()
-                    all_moves.append([0, -pi/2, map, self, True, tick, self.fall_damage])
+                    addtomove([0, -pi/2, map, self, True, tick, self.fall_damage])
                     self.is_on_ground = False
                 #-------------
             # mvt lattéral
             else:
                 index = 0
                 for i in range(1,len(map[0])):
-                    if map[self.x+62+x_axis][i] and not map[self.x+62+x_axis][i-1]:
-                        if abs(i - bottomY) < abs(index - bottomY):
+                    if map[self.x][i] and not map[self.x][i-1]:
+                        if abs(i - self.y) < abs(index - self.y):
                             index = i
-                if (index-bottomY) > -3:
-                    self.y += index-bottomY
-                    self.x += x_axis
+                if (index-self.y) > -3:
+                    self.y += index-self.y
 
         """ pour le deplacement sur les surface inclinés: prendre la colone
         pixel à droite ou gauch (selon le input), parcourir cet colone pour trouver
@@ -100,7 +99,7 @@ class Worm(Entity):
                 self.is_on_ground = True
 
     def draw(self, screen):
-        screen.blit(self.image, (self.x, self.y))
+        screen.blit(self.image, (self.x-62, self.y-80))
 
     def pg_blit(self, surface: pygame.Surface):
         """Pygame Blit : Fonction d'affichage spécifique au worm"""

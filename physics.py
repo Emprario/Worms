@@ -9,6 +9,7 @@ from utils import get_full_line
 from typing import Callable
 from functools import reduce
 
+
 all_moves: list[list[float, float, list[list[bool]], Entity, bool, int, Callable]] = list()
 
 # var: Callable = translation
@@ -20,6 +21,9 @@ def fall_damage(velocity: float, cst: int):
         return (velocity-cst) * x  # x to define -> depend on player max HP
 """
 
+def addtomove(append: list[float, float,list[list[bool]], Entity, bool, int, Callable]):
+    append[3].synchroniseXY()
+    all_moves.append(append)
 
 def translation(v_init: float, alpha: float, map: list[list[bool]], entity: Entity, force: bool, local_tick: int
                 ) -> tuple[bool, bool, None | float]:
