@@ -25,6 +25,8 @@ class Worm(Entity):
         self.movement_distance = 200 # NOT THE FINAL VALUE SUBJECT TO CHANGE
         self.movement_speed = 40 # SUBJECT TO CHANGE
         self.image = pygame.image.load("assets/worm/worm_sprite.png").convert_alpha()
+        self.face = 0 # face = 1 regard à droite    face = 0 regard à gauche
+        self.ChangeFace = False # Track if the direction of the worms is changed by the movement this frame
 
     def drop_worm(self, map, movelst):
         """
@@ -42,18 +44,22 @@ class Worm(Entity):
         :param y_axis: Type(int) haut à bas
         """
 
+        if self.face == 1 and x_axis < 0:
+            self.face = 0
+            self.ChangeFace = True
+        elif self.face == 0 and x_axis > 0:
+            self.face = 1
+            self.ChangeFace = True
+
         if self.is_on_ground:
 
             self.x += x_axis
-
-
             # mvt vers le bas
             if not map[self.x][self.y+1]:
                 self.y += 2
                 for i in range(self.y, len(map[0])):
                     if map[self.x][i]:
                         break
-                print(abs(self.y-i))
 
                 #--------------
                 if abs(self.y-i) > 30:
@@ -64,6 +70,7 @@ class Worm(Entity):
                     addtomove([0, -pi/2, map, self, True, tick, self.fall_damage])
                     self.is_on_ground = False
                 #-------------
+
             # mvt lattéral
             else:
                 index = 0
@@ -73,6 +80,10 @@ class Worm(Entity):
                             index = i
                 if (index-self.y) > -3:
                     self.y += index-self.y
+                else:
+                    self.x -= x_axis
+
+
 
         """ pour le deplacement sur les surface inclinés: prendre la colone
         pixel à droite ou gauch (selon le input), parcourir cet colone pour trouver
@@ -81,25 +92,21 @@ class Worm(Entity):
 
 
 
-    def jump_worm(self):
+    def jump_worm(self, tick, map):
         """
         Fait sauter le worm
         :return:
         """
-        if self.is_jumping:
-            if self.jump_current >= -self.jump_height:  # S'il na pas atteint sa hauteur maximale
-                direction = 1  # Le worms monte
-                if self.jump_current < 0:
-                    direction = -1  # Le worms descend
-                self.y -= (self.jump_current ** 2) * 0.5 * direction
-                self.jump_current -= 1
-            else:
-                self.is_jumping = False
-                self.jump_current = self.jump_height
-                self.is_on_ground = True
-
+        if self.face == 1:
+            addtomove([25, pi / 4, map, self, True, tick, self.fall_damage])
+        else:
+            addtomove([25, -pi / 4, map, self, True, tick, self.fall_damage])
+        self.is_on_ground = False
     def draw(self, screen):
-        screen.blit(self.image, (self.x-62, self.y-80))
+        if self.ChangeFace:
+            self.image = pygame.transform.flip(self.image, True, False)
+            self.ChangeFace = False
+        screen.blit(self.image, (self.x - 62, self.y - 80))
 
     def pg_blit(self, surface: pygame.Surface):
         """Pygame Blit : Fonction d'affichage spécifique au worm"""

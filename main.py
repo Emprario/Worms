@@ -182,6 +182,8 @@ while run:
     if keys[pygame.K_RIGHT]:
         x_movement = 2
     player.move_worm(x_movement, 0, map.map, all_moves, tick)
+    if keys[pygame.K_z]:
+        player.jump_worm(tick, map.map)
     player.draw(SCREEN)
     #----------------------------------------------
     
