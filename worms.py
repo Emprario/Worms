@@ -98,11 +98,16 @@ class Worm(Entity):
         :return:
         """
         if self.face == 1:
-            addtomove([25, pi / 4, map, self, True, tick, self.fall_damage])
+            addtomove([15, pi/4, map, self, True, tick, self.fall_damage])
         else:
-            addtomove([25, -pi / 4, map, self, True, tick, self.fall_damage])
+            addtomove([15, -pi/4, map, self, True, tick, self.fall_damage])
         self.is_on_ground = False
     def draw(self, screen):
+
+        font = pygame.font.Font(None, 24)
+        HP_surface = font.render(str(self.health), True, (0, 0, 0))
+        screen.blit(HP_surface, (self.x, self.y - 70))
+
         if self.ChangeFace:
             self.image = pygame.transform.flip(self.image, True, False)
             self.ChangeFace = False
@@ -113,4 +118,6 @@ class Worm(Entity):
         pass
 
     def fall_damage(self, *args):
+        if args[len(args)-1] > 3:
+            self.health -= round(2*args[len(args)-1])
         self.is_on_ground = True
