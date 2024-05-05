@@ -67,7 +67,7 @@ class Worm(Entity):
                     #             force: bool, local_tick: int) -> tuple[bool, bool, None | float]:
                     #
                     # all_moves: list[list[float, float, list[list[bool]], coordinate, Entity, bool, int, Callable]] = list()
-                    addtomove([0, -pi/2, map, self, True, tick, self.fall_damage])
+                    addtomove([0, -pi/2, map, self, True, 0, self.fall_damage])
                     self.is_on_ground = False
                 #-------------
 

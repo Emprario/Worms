@@ -105,7 +105,7 @@ while run:
                 if actual_weapon == 1:
                     pro_sniper = Pro_sniper(map.dimensions[0] // 2, map.dimensions[1] // 2, "", map.destruction_stack,25, 5, False)
                     all_sprites.add(pro_sniper)
-                    pro_sniper.add_to_move(all_moves, map.map, tick, inclinaison, 1)
+                    pro_sniper.add_to_move(all_moves, map.map, 0, inclinaison, 1)
                     pro_sniper.launched = True
                     print("missile launched")
 
@@ -163,10 +163,11 @@ while run:
 
     i = 0
     while i < len(all_moves):
-        print(tick, [move[3] for move in all_moves])
-        result = translation(*all_moves[i][:-2], tick - all_moves[i][-2])
+        # print(tick, [move[3] for move in all_moves])
+        result = translation(*all_moves[i][:-2], all_moves[i][-2])
         # print(result)
         all_moves[i][-3] = result[1]
+        all_moves[i][-2] += 1
         if result[0]:
             print("I: Killed")
             all_moves[i][-1](*all_moves[i][:-1], result[2])

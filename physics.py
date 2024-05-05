@@ -70,6 +70,4 @@ def translation(v_init: float, alpha: float, map: list[list[bool]], entity: Enti
 
             x, y = entity.get_speed(local_tick, v_init, alpha)
             return True, force, (x ** 2 + y ** 2) ** 0.5
-        return False, force, None
-    x, y = entity.get_speed(local_tick, v_init, alpha)
-    return True, force, (x ** 2 + y ** 2) ** 0.5
+    return False, force, None
