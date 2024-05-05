@@ -3,12 +3,11 @@ Module qui gère la physique dans le jeux
 Ce module est composé d'une liste d'appel qui est calqué sur la fonction de translation
 La translation via des vecteurs vitesses
 """
-from entity import Entity
-from CONSTS import coordinate, MILITICK
-from utils import get_full_line
 from typing import Callable
-from functools import reduce
 
+from CONSTS import coordinate, MILITICK, NB_PX_LEFT_RIGHT, SENS_DIRECT, SENS_INDIRECT
+from entity import Entity
+from utils import get_full_line
 
 all_moves: list[list[float, float, list[list[bool]], Entity, bool, int, Callable]] = list()
 
@@ -21,9 +20,11 @@ def fall_damage(velocity: float, cst: int):
         return (velocity-cst) * x  # x to define -> depend on player max HP
 """
 
-def addtomove(append: list[float, float,list[list[bool]], Entity, bool, int, Callable]):
+
+def addtomove(append: list[float, float, list[list[bool]], Entity, bool, int, Callable]):
     append[3].synchroniseXY()
     all_moves.append(append)
+
 
 def translation(v_init: float, alpha: float, map: list[list[bool]], entity: Entity, force: bool, local_tick: int
                 ) -> tuple[bool, bool, None | float]:
@@ -71,3 +72,59 @@ def translation(v_init: float, alpha: float, map: list[list[bool]], entity: Enti
             x, y = entity.get_speed(local_tick, v_init, alpha)
             return True, force, (x ** 2 + y ** 2) ** 0.5
     return False, force, None
+
+
+def get_right_left_px(px: coordinate, _from: coordinate, map: list[list[bool]]) -> tuple[coordinate, coordinate]:
+    """
+    Cacul les pixels droits et gauches du pixel d'impact
+    :param px: pixel d'impact dans le sol
+    :param _from: pixel d'impact de surface
+    :return: Pixel Droit, Pixel Gauche
+    """
+    visited = set(px)
+    from_right = _from
+    from_left = _from
+    ptr_right = 0
+    ptr_left = 0
+    freeze_right = False
+    freeze_left = False
+
+    # Recherche du début du sens direct pour vérifier _from pixel.
+    ptr = 0
+    x, y = px[0] - _from[0], px[1] - _from[1]
+    while ((x, y) != SENS_DIRECT[ptr] and ptr < 8):
+        ptr += 1
+    if (ptr == 8):
+        raise AssertionError("px pixel and _from pixel are not contiguously")
+
+    ptr_right = ptr
+    ptr_left = ptr
+
+    for i in range(NB_PX_LEFT_RIGHT):
+
+        # Right first
+        if not freeze_right:
+            for j in range(1, len(SENS_DIRECT)):
+                x, y = SENS_DIRECT[nptr := (ptr_right + j) % len(SENS_DIRECT)]
+                if map[from_right + x][from_right + y] and (x, y) not in visited:
+                    visited.add((x, y))
+                    from_right = x, y
+                    ptr_right = nptr
+                    break
+            else:
+                freeze_right = True
+
+        # Left then
+        if not freeze_left:
+            for j in range(1, len(SENS_INDIRECT)):
+                x, y = SENS_INDIRECT[nptr := (ptr_left + j) % len(SENS_INDIRECT)]
+                if map[from_left + x][from_left + y] and (x, y) not in visited:
+                    visited.add((x, y))
+                    from_left = x, y
+                    ptr_left = nptr
+                    break
+            else:
+                freeze_left = True
+
+    return freeze_right, from_left
+

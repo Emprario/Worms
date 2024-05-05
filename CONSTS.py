@@ -16,8 +16,14 @@ class OnLoadMapError(Exception):
 coordinate = tuple[int, int]        # Alias pour les coordonées
 DEFAULT_DENSITY = 20                # Densité pour le traçage de cercle
 MAX_THREAD_BY_CALC = 1              # Depreceated
-SIMULTANITY_THRESHOLD = 128        # Nombre maximum de cache qui est généré
+SIMULTANITY_THRESHOLD = 128         # Nombre maximum de cache qui est généré
 MIN_SIMULTANITY_THRESHOLD = 16      # Nombre minimum de cache pour démarer le programme
 G = 0.075                           # G : la constante de gravité
 FRAMERATE = 60                      # Le framerate à atteindre (capé)
 MILITICK = 50                       # Subdivision du tick pour décomposer le mouvement.
+NB_PX_LEFT_RIGHT = 10               # Nb de pixel parcourue à droite et à gauche du pixel d'impact, donne une précision
+                                    # Sur la normale de l'impact
+SENS_DIRECT = ((-1, -1), (-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1))
+                                    # Défini le sens direct (selon l'orientation pygame de l'axe y)
+SENS_INDIRECT = ((-1, -1), (-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1))[::-1]
+                                    # Défini le sens indirect (selon l'orientation pygame de l'axe y)
