@@ -94,6 +94,9 @@ def get_right_left_px(px: coordinate, _from: coordinate) -> tuple[coordinate, co
 
         # Right first
         ptr = 0
+        x, y = px[0] - from_right[0], px[1] - from_right[1]
+        while ((x, y) != SENS_DIRECT[ptr]):
+            ptr += 1
         if not freeze_right:
             for j in range(1, len(SENS_DIRECT)):
                 x, y = SENS_DIRECT[(ptr + j) % len(SENS_DIRECT)]
@@ -106,14 +109,21 @@ def get_right_left_px(px: coordinate, _from: coordinate) -> tuple[coordinate, co
 
         # Left then
         ptr = 0
+        x, y = px[0] - from_left[0], px[1] - from_left[1]
+        while ((x, y) != SENS_INDIRECT[ptr]):
+            ptr += 1
+        last = from_left
         if not freeze_left:
             for j in range(1, len(SENS_INDIRECT)):
                 x, y = SENS_INDIRECT[(ptr + j) % len(SENS_INDIRECT)]
                 if map[from_left + x, from_left + y] and (x, y) not in visited:
-                    visited.add((x, y))
-                    from_left = x, y
-                    break
-            else:
+                    last = (x, y)
+
+            if last == from_left:
                 freeze_left = True
+            else:
+                visited.add(last)
+                from_left = last
+
 
     return from_right, from_left

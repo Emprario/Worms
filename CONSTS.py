@@ -23,7 +23,6 @@ FRAMERATE = 60                      # Le framerate à atteindre (capé)
 MILITICK = 50                       # Subdivision du tick pour décomposer le mouvement.
 NB_PX_LEFT_RIGHT = 10               # Nb de pixel parcourue à droite et à gauche du pixel d'impact, donne une précision
                                     # Sur la normale de l'impact
-SENS_DIRECT = ((-1, -1), (-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1))
+SENS_DIRECT = ((-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1))
                                     # Défini le sens direct (selon l'orientation pygame de l'axe y)
-SENS_INDIRECT = ((-1, -1), (-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1))[::-1]
-                                    # Défini le sens indirect (selon l'orientation pygame de l'axe y)
+SENS_INDIRECT = SENS_DIRECT[::-1]   # Défini le sens indirect (selon l'orientation pygame de l'axe y)
