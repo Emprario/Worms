@@ -9,24 +9,19 @@ from CONSTS import coordinate, MILITICK, NB_PX_LEFT_RIGHT, SENS_DIRECT, SENS_IND
 from entity import Entity
 from utils import get_full_line
 
-all_moves: list[list[float, float, list[list[bool]], Entity, bool, int, Callable]] = list()
+all_moves: list[list[float | float | list[list[bool]] | Entity | bool | int | Callable]] = list()
+map: object = None
 
-# var: Callable = translation
-"""
-fall: Callable = fall_damage
+def def_map(map_local: object) -> None:
+    global map
+    map = map_local
 
-def fall_damage(velocity: float, cst: int):     
-    if velocity > cst:
-        return (velocity-cst) * x  # x to define -> depend on player max HP
-"""
-
-
-def addtomove(append: list[float, float, list[list[bool]], Entity, bool, int, Callable]):
-    append[3].synchroniseXY()
-    all_moves.append(append)
+def addtomove(v_init: float, alpha: float, entity: Entity, callback: Callable):
+    entity.synchroniseXY()
+    all_moves.append([v_init, alpha, entity, True, 0, callback])
 
 
-def translation(v_init: float, alpha: float, map: list[list[bool]], entity: Entity, force: bool, local_tick: int
+def translation(v_init: float, alpha: float, entity: Entity, force: bool, local_tick: int
                 ) -> tuple[bool, bool, None | float]:
     """
     Calcul la position d'une Entity au prochain tick
@@ -49,7 +44,7 @@ def translation(v_init: float, alpha: float, map: list[list[bool]], entity: Enti
         # if not map[entity.x][entity.y + 1]:
         #    force = False
         # print(entity.x)
-        if map[entity.x][entity.y]:
+        if map[entity.x, entity.y]:
             force = False
 
             lst = get_full_line(temp, (entity.x, entity.y))
@@ -63,7 +58,7 @@ def translation(v_init: float, alpha: float, map: list[list[bool]], entity: Enti
                 i = len(lst) - 1
 
             impact = lst[i]
-            while (not map[lst[i][0]][lst[i][1]]) and 0 <= i < len(lst):
+            while (not map[lst[i][0], lst[i][1]]) and 0 <= i < len(lst):
                 impact = lst[i]
                 i += step
 
@@ -74,7 +69,7 @@ def translation(v_init: float, alpha: float, map: list[list[bool]], entity: Enti
     return False, force, None
 
 
-def get_right_left_px(px: coordinate, _from: coordinate, map: list[list[bool]]) -> tuple[coordinate, coordinate]:
+def get_right_left_px(px: coordinate, _from: coordinate) -> tuple[coordinate, coordinate]:
     """
     Cacul les pixels droits et gauches du pixel d'impact
     :param px: pixel d'impact dans le sol
@@ -84,8 +79,6 @@ def get_right_left_px(px: coordinate, _from: coordinate, map: list[list[bool]]) 
     visited = set(px)
     from_right = _from
     from_left = _from
-    ptr_right = 0
-    ptr_left = 0
     freeze_right = False
     freeze_left = False
 
@@ -97,34 +90,30 @@ def get_right_left_px(px: coordinate, _from: coordinate, map: list[list[bool]]) 
     if (ptr == 8):
         raise AssertionError("px pixel and _from pixel are not contiguously")
 
-    ptr_right = ptr
-    ptr_left = ptr
-
     for i in range(NB_PX_LEFT_RIGHT):
 
         # Right first
+        ptr = 0
         if not freeze_right:
             for j in range(1, len(SENS_DIRECT)):
-                x, y = SENS_DIRECT[nptr := (ptr_right + j) % len(SENS_DIRECT)]
-                if map[from_right + x][from_right + y] and (x, y) not in visited:
+                x, y = SENS_DIRECT[(ptr + j) % len(SENS_DIRECT)]
+                if map[from_right + x, from_right + y] and (x, y) not in visited:
                     visited.add((x, y))
                     from_right = x, y
-                    ptr_right = nptr
                     break
             else:
                 freeze_right = True
 
         # Left then
+        ptr = 0
         if not freeze_left:
             for j in range(1, len(SENS_INDIRECT)):
-                x, y = SENS_INDIRECT[nptr := (ptr_left + j) % len(SENS_INDIRECT)]
-                if map[from_left + x][from_left + y] and (x, y) not in visited:
+                x, y = SENS_INDIRECT[(ptr + j) % len(SENS_INDIRECT)]
+                if map[from_left + x, from_left + y] and (x, y) not in visited:
                     visited.add((x, y))
                     from_left = x, y
-                    ptr_left = nptr
                     break
             else:
                 freeze_left = True
 
-    return freeze_right, from_left
-
+    return from_right, from_left

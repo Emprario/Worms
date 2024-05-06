@@ -16,8 +16,8 @@ class OnLoadMapError(Exception):
 coordinate = tuple[int, int]        # Alias pour les coordonées
 DEFAULT_DENSITY = 20                # Densité pour le traçage de cercle
 MAX_THREAD_BY_CALC = 1              # Depreceated
-SIMULTANITY_THRESHOLD = 128         # Nombre maximum de cache qui est généré
-MIN_SIMULTANITY_THRESHOLD = 16      # Nombre minimum de cache pour démarer le programme
+SIMULTANITY_THRESHOLD = 32          # Nombre maximum de cache qui est généré
+MIN_SIMULTANITY_THRESHOLD = 8       # Nombre minimum de cache pour démarer le programme
 G = 0.075                           # G : la constante de gravité
 FRAMERATE = 60                      # Le framerate à atteindre (capé)
 MILITICK = 50                       # Subdivision du tick pour décomposer le mouvement.
