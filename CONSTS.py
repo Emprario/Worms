@@ -4,6 +4,7 @@ Il faut veiller à n'importer aucun module dans celui-ci sauf des modules extern
 Merci de mettre des hints sur les constantes dans le programme afin de faciliter leurs utilisations.
 """
 
+from math import pi
 
 # Errors
 
@@ -26,3 +27,5 @@ NB_PX_LEFT_RIGHT = 10               # Nb de pixel parcourue à droite et à gauc
 SENS_DIRECT = ((-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1))
                                     # Défini le sens direct (selon l'orientation pygame de l'axe y)
 SENS_INDIRECT = SENS_DIRECT[::-1]   # Défini le sens indirect (selon l'orientation pygame de l'axe y)
+REMOTE_POINT = 10                   # Défini le nombre de point qu'il remonter à l'arrière
+MIN_SPEED_REBOND = pi               # Défini la speed minimum pour rebondir

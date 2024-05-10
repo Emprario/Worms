@@ -24,7 +24,7 @@ from debug_pygame import show_point, get_point_from_idx
 from debug_utils import get_time_incache
 from utils import get_circle
 from CONSTS import FRAMERATE
-from physics import all_moves, translation, addtomove, def_map
+from physics import move_entities, addtomove, def_map
 from weapon import Pro_bazooka
 from weapon import Bazooka
 from weapon import Pro_sniper
@@ -162,19 +162,7 @@ while run:
     # Execution des explosions
     map.void_destruction_stack()
 
-    i = 0
-    while i < len(all_moves):
-        # print(tick, [move[3] for move in all_moves])
-        result = translation(*all_moves[i][:-2], all_moves[i][-2])
-        # print(result)
-        all_moves[i][-3] = result[1]
-        all_moves[i][-2] += 1
-        if result[0]:
-            print("I: Killed")
-            all_moves[i][-1](*all_moves[i][:-1], result[2])
-            del all_moves[i]
-        else:
-            i += 1
+    move_entities()
 
     #------------- Worms part ---------------------
     x_movement = 0
