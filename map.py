@@ -20,6 +20,8 @@ from utils import get_full_line, get_circle
 # Increase by a lot the recursion limit to make algo_peinture working
 setrecursionlimit(9000000)
 
+def get_point_from_idx(idx: int, SIZE) -> tuple[int, int]:
+    return (idx // 4) % SIZE[0], (idx // 4) // SIZE[0]
 
 def gen_segmented_map(vectmap: list[list[coordinate]]) -> list[list[coordinate]]:
     """
@@ -405,7 +407,7 @@ class TileMap:
         :param idx: Pixel index in self.texture (should point on Alpha channel)
         :param screen: The screen to update
         """
-        x, y = get_point_from_idx(idx)
+        x, y = get_point_from_idx(idx, self.dimensions)
         if self.texture[idx] == 255:
             # self.Surf.set_at((x, y), self.texture[idx + 1:idx + 4])
             r, g, b = self.texture[idx + 1:idx + 4]

@@ -24,7 +24,7 @@ from debug_pygame import show_point, get_point_from_idx
 from debug_utils import get_time_incache
 from utils import get_circle
 from CONSTS import FRAMERATE
-from physics import all_moves, translation
+from physics import move_entities, addtomove, def_map
 from weapon import Pro_bazooka
 from weapon import Bazooka
 from weapon import Pro_sniper
@@ -42,6 +42,7 @@ pygame.init()
 
 path = "assets/map/01.map"
 map = TileMap(path)
+def_map(map)
 
 flags = pygame.FULLSCREEN | pygame.HWSURFACE
 SCREEN = pygame.display.set_mode(map.dimensions, flags)
@@ -141,7 +142,7 @@ while run:
                 if actual_weapon == 1:
                     pro_sniper = Pro_sniper(int(round(sniper.x+25)), int(round(sniper.y+25)), "assets/textures/Explosion.png", map.destruction_stack,25, 8, False)
                     all_sprites.add(pro_sniper)
-                    pro_sniper.add_to_move(all_moves, map.map, tick, inclinaison, 1)
+                    addtomove(power * pro_sniper.speed, inclinaison, pro_sniper, pro_sniper.destroy)
                     pro_sniper.launched = True
                     print("missile launched")
 
@@ -159,17 +160,17 @@ while run:
                 if actual_weapon == 0:
                     pro_bazooka = Pro_bazooka(int(round(bazooka.x+25)), int(round(bazooka.y+25)), "assets/textures/Explosion.png", map.destruction_stack,12,25,False)
                     all_sprites.add(pro_bazooka)
-                    pro_bazooka.add_to_move(all_moves, map.map, tick, inclinaison, power)
+                    addtomove(power * pro_bazooka.speed, inclinaison, pro_bazooka, pro_bazooka.destroy)
                     pro_bazooka.launched = True
                 elif actual_weapon == 2:
                     pro_grenade = Pro_grenade(int(round(grenade.x+25)), int(round(grenade.y+25)), "assets/textures/Grenade.png", map.destruction_stack,7, 20, True)
                     all_sprites.add(pro_grenade)
-                    pro_grenade.add_to_move(all_moves, map.map, tick, inclinaison, power)
+                    addtomove(power * pro_grenade.speed, inclinaison, pro_grenade, pro_grenade.destroy)
                     pro_grenade.launched = True
                 elif actual_weapon == 3:
                     pro_frag_grenade = Pro_frag_grenade(int(round(grenade_frag.x+25)), int(round(grenade_frag.y+25)), "assets/textures/Grenade_frag.png",map.destruction_stack, 7,20,True)
                     all_sprites.add(pro_frag_grenade)
-                    pro_frag_grenade.add_to_move(all_moves, map.map, tick, inclinaison, power)
+                    addtomove(power * pro_frag_grenade.speed, inclinaison, pro_frag_grenade, pro_frag_grenade.destroy)
                     pro_frag_grenade.launched = True
                 power = 0.2
                 print("missile launched")
@@ -229,18 +230,7 @@ while run:
 >>>>>>> 89175cc (weapon V3 avec fleche, png, et rotation d'arme)
     map.void_destruction_stack()
 
-    i = 0
-    while i < len(all_moves):
-        print(tick, [move[3] for move in all_moves])
-        result = translation(*all_moves[i][:-2], tick - all_moves[i][-2])
-        # print(result)
-        all_moves[i][-3] = result[1]
-        if result[0]:
-            print("I: Killed")
-            all_moves[i][-1](*all_moves[i][:-1], result[2])
-            del all_moves[i]
-        else:
-            i += 1
+    move_entities()
 
     #------------- Worms part ---------------------
     x_movement = 0
@@ -249,7 +239,9 @@ while run:
         x_movement = -2
     if keys[pygame.K_RIGHT]:
         x_movement = 2
-    player.move_worm(x_movement, 0, map.map, all_moves, tick)
+    player.move_worm(x_movement, 0, map.map)
+    if keys[pygame.K_z]:
+        player.jump_worm(tick, map.map)
     player.draw(SCREEN)
     #----------------------------------------------
     
