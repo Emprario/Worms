@@ -89,15 +89,16 @@ class Grenade_frag(Weapon):
     def move_with_rota(self,angle):
         self.x=self.x_base+cos(angle)*20
         self.y=self.y_base+sin(angle)*20
+<<<<<<< HEAD
 
+=======
+>>>>>>> 00a02e0b4971eb669f34031ef6b17c8cecb7f171
 
 
 class Projectile(Entity):
     def __init__(self, x: int, y: int, image: str, map_destroy_stack, speed: float,taille: int, rebond: bool):
         super().__init__(x, y)
         self.image = pygame.Surface((taille, taille))
-        # self.image.blit(pygame.image.load(image), (0, 0))
-        # self.rect = self.image.get_rect()
         self.speed = speed
         self.launched = False
         self.map_destroy_stack = map_destroy_stack
@@ -117,10 +118,6 @@ class Pro_bazooka(Projectile):
         # self.map_destroy_stack.extend([(circle[i], 20.0) for i in range(len(circle))])
         self.kill()
 
-    # all_moves: list[list[float, float, list[list[bool]], Entity, bool, int, Callable]] = list()
-    def add_to_move(self, movelst: list, map: list[list[bool]], tick: int, inclinaison: int, power: int):
-        movelst.append([power * self.speed, inclinaison, map, self, True, tick, self.destroy])
-
 
 class Pro_sniper(Projectile):
     def __init__(self, x: int, y: int, image: str, map_destroy_stack, speed: float,taille: int, rebond: bool):
@@ -132,10 +129,6 @@ class Pro_sniper(Projectile):
         self.map_destroy_stack.append((pos, 10))
         # self.map_destroy_stack.extend([(circle[i], 20.0) for i in range(len(circle))])
         self.kill()
-
-    # all_moves: list[list[float, float, list[list[bool]], Entity, bool, int, Callable]] = list()
-    def add_to_move(self, movelst: list, map: list[list[bool]], tick: int, inclinaison: int, power: int):
-        movelst.append([power * self.speed, inclinaison, map, self, True, tick, self.destroy])
 
 
 class Pro_grenade(Projectile):
@@ -150,9 +143,6 @@ class Pro_grenade(Projectile):
         # self.map_destroy_stack.extend([(circle[i], 20.0) for i in range(len(circle))])
         self.kill()
 
-    # all_moves: list[list[float, float, list[list[bool]], Entity, bool, int, Callable]] = list()
-    def add_to_move(self, movelst: list, map: list[list[bool]], tick: int, inclinaison: int, power: int):
-        movelst.append([power * self.speed, inclinaison, map, self, True, tick, self.destroy])
 
 
 
@@ -166,63 +156,3 @@ class Pro_frag_grenade(Projectile):
         self.map_destroy_stack.append((pos, 50))
         self.map_destroy_stack.extend([(circle[i], 30.0) for i in range(len(circle))])
         self.kill()
-
-    # all_moves: list[list[float, float, list[list[bool]], Entity, bool, int, Callable]] = list()
-    def add_to_move(self, movelst: list, map: list[list[bool]], tick: int, inclinaison: int, power: int):
-        movelst.append([power * self.speed, inclinaison, map, self, True, tick, self.destroy])
-
-
-"""    def update(self):
-        if self.launched:
-            self.rect.x += self.speed
-            if self.rect.left > map.dimensions:
-                self.kill()"""
-
-"""class Obstacle(pygame.sprite.Sprite):
-    def __init__(self, x, y):
-        super().__init__()
-        self.image = pygame.Surface((50, 50))
-        self.image.fill((255, 0, 0))
-        self.rect = self.image.get_rect()
-        self.rect.center = (x, y)"""
-
-# Création des obstacles
-# obstacle = Obstacle(screen_width - 100, screen_height // 2)
-# all_sprites.add(obstacle)
-# obstacles.add(obstacle)
-
-"""
-running = True
-while running:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE:
-                projectile = Projectile()
-                projectile.rect.center = (50, flags // 2)
-                all_sprites.add(projectile)
-                projectile.launched = True
-
-    # Vérification des collisions entre projectiles et obstacles
-    for projectile in all_sprites:
-        if isinstance(projectile, Projectile) and projectile.launched:
-            collisions = pygame.sprite.spritecollide(projectile, obstacles, True)
-            if collisions:
-                projectile.kill()
-                
-"""
-
-# all_sprites.update()
-
-
-# screen.fill(BLACK)
-
-
-# all_sprites.draw(screen)
-
-
-# pygame.display.flip()
-
-
-# pygame.time.Clock().tick(60)
