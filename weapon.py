@@ -89,11 +89,6 @@ class Grenade_frag(Weapon):
     def move_with_rota(self,angle):
         self.x=self.x_base+cos(angle)*20
         self.y=self.y_base+sin(angle)*20
-<<<<<<< HEAD
-
-=======
->>>>>>> 00a02e0b4971eb669f34031ef6b17c8cecb7f171
-
 
 class Projectile(Entity):
     def __init__(self, x: int, y: int, image: str, map_destroy_stack, speed: float,taille: int, rebond: bool):
