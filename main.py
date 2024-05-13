@@ -15,179 +15,142 @@ La boucle principale est elle-même composé des  éléments suivants
     * Flip de l'écran
     * Calcul du framerate
 """
-from threading import Thread
-
 import pygame
 
+from entity import Entity
 from map import TileMap
-from debug_pygame import show_point, get_point_from_idx
 from debug_utils import get_time_incache
-from utils import get_circle
-from CONSTS import FRAMERATE
+from menu import Button, Menu
+from CONSTS import FRAMERATE, MENU_SIZE
 from physics import all_moves, translation
-from weapon import Pro_bazooka
-from weapon import Bazooka
-from weapon import Pro_sniper
-from weapon import Pro_grenade
-from weapon import Pro_frag_grenade
 from worms import Worm
-from math import pi
-from weapon import  Charg_bar
-
-pygame.init()
-
-path = "assets/map/01.map"
-map = TileMap(path)
-
-flags = pygame.FULLSCREEN | pygame.HWSURFACE
-SCREEN = pygame.display.set_mode(map.dimensions, flags)
-
-pygame.display.set_caption("PalaVect2")
-
-Oclock = pygame.time.Clock()
-tick = 0
-
-debug_switch = False
-fps = 0
-
-map.blit_texture(all_pxs=True)
-
-all_sprites = pygame.sprite.Group()
-
-actual_weapon = 0
-inclinaison = 0.0
-power = 0.1
-
-player = Worm(0,680,358)
-
-bazooka = Bazooka((map.dimensions[0] // 2)-30, (map.dimensions[1] // 2)-30, "assets/textures/Bazooka.png", -30)
-all_sprites.add(bazooka)
-charg_bar = Charg_bar((map.dimensions[0] // 2)-30, (map.dimensions[1] // 2)-60)
-all_sprites.add(charg_bar)
-
-run = True
-while run:
-    destruction = ()
-
-    if debug_switch:
-        map.print_map()
-    else:
-        map.blit_texture()
-    SCREEN.blit(map.Surf, (0, 0))
 
 
-    for event in pygame.event.get():
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_s:
-                debug_switch = not debug_switch
-                map.blit_texture(all_pxs=True)
-            elif event.key == pygame.K_d:
-                get_time_incache()
-                print("Available :", map.available_ONMAPs)
-                print("To clean :", map.clear_ONMAPs)
-            elif event.key == pygame.K_f:
-                map = TileMap(path)
-                map.blit_texture(all_pxs=True)
-            elif event.key == pygame.K_ESCAPE:
-                run = False
-            elif event.key == pygame.K_e:
-                if actual_weapon <= 2:
-                    actual_weapon += 1
-                else:
-                    actual_weapon = 0
-            elif event.key == pygame.K_UP:
-                inclinaison -= 0.1
-                bazooka.rotate(0.1*360/(2*pi))
-            elif event.key == pygame.K_DOWN:
-                inclinaison += 0.1
-                bazooka.rotate(-0.1 * 360 / (2 * pi))
-            elif event.key == pygame.K_SPACE:
-                if actual_weapon == 1:
-                    pro_sniper = Pro_sniper(map.dimensions[0] // 2, map.dimensions[1] // 2, "", map.destruction_stack,25, 5, False)
-                    all_sprites.add(pro_sniper)
-                    pro_sniper.add_to_move(all_moves, map.map, tick, inclinaison, 1)
-                    pro_sniper.launched = True
-                    print("missile launched")
+class Game:
+    def __init__(self):
+        pygame.init()
+        pygame.display.set_caption("PalaVect2")
 
-                if actual_weapon == 0 or actual_weapon == 2 or actual_weapon == 3:
-                    power = -tick * 0.015
-                    charg_bar.agrandissement = True
-                    charge = power
-                    charg_bar.up_taille(10)
+        self.path = "assets/map/01.map"
+        self.map = TileMap(self.path)
 
-        if event.type == pygame.KEYUP:
-            if event.key == pygame.K_SPACE:
-                power += tick * 0.015 + 0.2
-                if power > 1:
-                    power = 1
-                if actual_weapon == 0:
-                    pro_bazooka = Pro_bazooka(map.dimensions[0] // 2, map.dimensions[1] // 2, "", map.destruction_stack,12,20,False)
-                    all_sprites.add(pro_bazooka)
-                    pro_bazooka.add_to_move(all_moves, map.map, tick, inclinaison, power)
-                    pro_bazooka.launched = True
-                elif actual_weapon == 2:
-                    pro_grenade = Pro_grenade(map.dimensions[0] // 2, map.dimensions[1] // 2, "", map.destruction_stack,7, 10, True)
-                    all_sprites.add(pro_grenade)
-                    pro_grenade.add_to_move(all_moves, map.map, tick, inclinaison, power)
-                    pro_grenade.launched = True
-                elif actual_weapon == 3:
-                    pro_frag_grenade = Pro_frag_grenade(map.dimensions[0] // 2, map.dimensions[1] // 2, "",map.destruction_stack, 7,10,True)
-                    all_sprites.add(pro_frag_grenade)
-                    pro_frag_grenade.add_to_move(all_moves, map.map, tick, inclinaison, power)
-                    pro_frag_grenade.launched = True
-                power = 0.2
-                print("missile launched")
-                charg_bar.agrandissement=False
-                charg_bar.reset_taille()
+        # flags = pygame.FULLSCREEN | pygame.HWSURFACE
+        self.SCREEN = pygame.display.set_mode(self.map.dimensions)  # , flags)
+        self.ACTIVE_MENU: Menu = None
 
-        elif event.type == pygame.MOUSEBUTTONDOWN:
-            print("Mouse point @", pygame.mouse.get_pos())
-            circle = get_circle(5, pos := pygame.mouse.get_pos(), radius := 40)
-            map.destruction_stack.append((pygame.mouse.get_pos(), 40.0))
-            map.destruction_stack.extend([(circle[i], 20.0) for i in range(len(circle))])
-        elif event.type == pygame.QUIT:
-            pygame.quit()
-            exit(1)
+        self.Oclock = pygame.time.Clock()
+        self.tick = 0
+        self.fps = 0
 
-    # Upadte des sprites
-    for sprite in all_sprites:
-        SCREEN.blit(sprite.image, (sprite.x, sprite.y))
+        self.map.blit_texture(all_pxs=True)
 
-    if charg_bar.agrandissement == True:
-        charge = power + tick * 0.015 + 0.2
-        if charge < 1:
-            charg_bar.up_taille(3)
+        self.all_sprites: set[Entity] = set()
 
-    # Execution des explosions
-    map.void_destruction_stack()
+        self.current_player = 0
+        self.players: list[Worm] = [Worm(0, 680, 358), Worm(0, 950, 358)]
 
-    i = 0
-    while i < len(all_moves):
-        print(tick, [move[3] for move in all_moves])
-        result = translation(*all_moves[i][:-2], tick - all_moves[i][-2])
-        # print(result)
-        all_moves[i][-3] = result[1]
-        if result[0]:
-            print("I: Killed")
-            all_moves[i][-1](*all_moves[i][:-1], result[2])
-            del all_moves[i]
-        else:
-            i += 1
+        self.running = False
+        self.pause = False
 
-    #------------- Worms part ---------------------
-    x_movement = 0
-    keys = pygame.key.get_pressed()
-    if keys[pygame.K_LEFT]:
-        x_movement = -2
-    if keys[pygame.K_RIGHT]:
-        x_movement = 2
-    player.move_worm(x_movement, 0, map.map, all_moves, tick)
-    player.draw(SCREEN)
-    #----------------------------------------------
-    
-    pygame.display.flip()
-    Oclock.tick(FRAMERATE)
-    tick += 1
+        self.PAUSE_MENU = None
+        self.create_menus()
 
-    # if fps != Oclock.get_fps() and (fps := Oclock.get_fps()) < 60 and fps != 0:
-    #    print(f"/!\\ Low tick /!\\ framerate@{fps}")
+    def create_menus(self):
+        resume_button = Button(304, 125, pygame.image.load("assets/menu/buttons/resume.png").convert_alpha(), 1,
+                               self.exit_menu)
+        options_button = Button(297, 250, pygame.image.load("assets/menu/buttons/options.png").convert_alpha(), 1,
+                                None)
+        quit_button = Button(336, 375, pygame.image.load("assets/menu/buttons/quit.png").convert_alpha(), 1,
+                             self.exit_game)
+
+        self.PAUSE_MENU = Menu("Pause", MENU_SIZE[0], MENU_SIZE[1], None, [resume_button, options_button, quit_button])
+
+    def exit_game(self):
+        self.running = False
+
+    def exit_menu(self):
+        self.ACTIVE_MENU = None
+
+    def next_player(self):
+        self.current_player += 1
+        self.current_player %= len(self.players)
+
+    def run(self):
+        self.running = True
+        for player in self.players:
+            self.all_sprites.add(player)
+
+        # ----------------- Boucle principale --------------------
+        while self.running:
+            if self.ACTIVE_MENU is not None:
+                for event in pygame.event.get():
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        self.ACTIVE_MENU.onClick(pygame.mouse.get_pos())
+            else:
+                self.map.blit_texture()
+                self.SCREEN.blit(self.map.Surf, (0, 0))
+
+                # ------------- Gestion des événements -------------------
+                for event in pygame.event.get():
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_o:
+                            get_time_incache()
+                            print("Available :", self.map.available_ONMAPs)
+                            print("To clean :", self.map.clear_ONMAPs)
+                        elif event.key == pygame.K_m:
+                            self.next_player()
+                        elif event.key == pygame.K_ESCAPE:
+                            self.exit_game()
+                        elif event.key == pygame.K_p:
+                            self.ACTIVE_MENU = self.PAUSE_MENU
+                            self.ACTIVE_MENU.draw(self.SCREEN)
+                        # elif event.key == pygame.K_f:
+                        #    self.map = TileMap(self.path)
+                        #    self.map.blit_texture(all_pxs=True)
+
+                # ------------- Affichage des Entités --------------------
+                for sprite in self.all_sprites:
+                    self.SCREEN.blit(sprite.image, (sprite.x - sprite.offset_x, sprite.y - sprite.offset_y))
+
+                # ------------- Execution des explosions -----------------
+                self.map.void_destruction_stack()
+
+                # ------------- Mouvement des joueurs --------------------
+                x_movement = 0
+                keys = pygame.key.get_pressed()
+                if keys[pygame.K_q]:
+                    x_movement = -2
+                if keys[pygame.K_d]:
+                    x_movement = 2
+                self.players[self.current_player].move_worm(x_movement, 0, self.map.map, all_moves, self.tick)
+                for i in range(len(self.players)):
+                    if i != self.current_player:
+                        self.players[i].move_worm(0, 0, self.map.map, all_moves, self.tick)
+
+                # ------------- Déplacement des Entités ------------------
+                i = 0
+                while i < len(all_moves):
+                    print(self.tick, [move[3] for move in all_moves])
+                    result = translation(*all_moves[i][:-2], self.tick - all_moves[i][-2])
+                    # print(result)
+                    all_moves[i][-3] = result[1]
+                    if result[0]:
+                        print("I: Killed")
+                        all_moves[i][-1](*all_moves[i][:-1], result[2])
+                        del all_moves[i]
+                    else:
+                        i += 1
+
+                # -------------- Actualisation pygame --------------------
+                pygame.display.flip()
+                self.Oclock.tick(FRAMERATE)
+                self.tick += 1
+
+                # if fps != Oclock.get_fps() and (fps := Oclock.get_fps()) < 60 and fps != 0:
+                #    print(f"/!\\ Low tick /!\\ framerate@{fps}")
+        pygame.quit()
+
+
+if __name__ == "__main__":
+    theGame = Game()
+    theGame.run()

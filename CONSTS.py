@@ -13,6 +13,7 @@ class OnLoadMapError(Exception):
 
 # Constantes
 
+MENU_SIZE = (1920, 1080)
 coordinate = tuple[int, int]        # Alias pour les coordonées
 DEFAULT_DENSITY = 20                # Densité pour le traçage de cercle
 MAX_THREAD_BY_CALC = 1              # Depreceated

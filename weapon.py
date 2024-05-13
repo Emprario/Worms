@@ -3,6 +3,7 @@ import pygame
 from entity import Entity
 from math import pi
 from utils import get_circle
+from physics import addtomove
 
 
 # path = "assets/map/01.map"
@@ -76,7 +77,7 @@ class Pro_bazooka(Projectile):
 
     # all_moves: list[list[float, float, list[list[bool]], Entity, bool, int, Callable]] = list()
     def add_to_move(self, movelst: list, map: list[list[bool]], tick: int, inclinaison: int, power: int):
-        movelst.append([power * self.speed, inclinaison, map, self, True, tick, self.destroy])
+        addtomove([power * self.speed, inclinaison, map, self, True, tick, self.destroy])
 
 
 class Pro_sniper(Projectile):
@@ -92,7 +93,7 @@ class Pro_sniper(Projectile):
 
     # all_moves: list[list[float, float, list[list[bool]], Entity, bool, int, Callable]] = list()
     def add_to_move(self, movelst: list, map: list[list[bool]], tick: int, inclinaison: int, power: int):
-        movelst.append([power * self.speed, inclinaison, map, self, True, tick, self.destroy])
+        addtomove([power * self.speed, inclinaison, map, self, True, tick, self.destroy])
 
 
 class Pro_grenade(Projectile):
@@ -108,7 +109,7 @@ class Pro_grenade(Projectile):
 
     # all_moves: list[list[float, float, list[list[bool]], Entity, bool, int, Callable]] = list()
     def add_to_move(self, movelst: list, map: list[list[bool]], tick: int, inclinaison: int, power: int):
-        movelst.append([power * self.speed, inclinaison, map, self, True, tick, self.destroy])
+        addtomove([power * self.speed, inclinaison, map, self, True, tick, self.destroy])
 
 
 class Pro_frag_grenade(Projectile):
@@ -124,7 +125,7 @@ class Pro_frag_grenade(Projectile):
 
     # all_moves: list[list[float, float, list[list[bool]], Entity, bool, int, Callable]] = list()
     def add_to_move(self, movelst: list, map: list[list[bool]], tick: int, inclinaison: int, power: int):
-        movelst.append([power * self.speed, inclinaison, map, self, True, tick, self.destroy])
+        addtomove([power * self.speed, inclinaison, map, self, True, tick, self.destroy])
 
 
 """    def update(self):

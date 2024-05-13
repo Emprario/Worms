@@ -14,7 +14,7 @@ class Worm(Entity):
         Constructeur de Worm
         :param camp: Camp du worm (pas nécessairement binaire)
         """
-        super().__init__(x, y)
+        super().__init__(x, y, 62, 80)
         self.team = camp # L'équipe du worm
         self.health = hp
         self.alive = True # Checker si le worm est en vie
