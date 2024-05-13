@@ -87,12 +87,12 @@ def move_entities():
         # print(result)
         all_moves[i][-4] = result[1]
         all_moves[i][-3] += 1
-        if result[0] and result[2] < MIN_SPEED_REBOND:
+        if result[0]:
             print("I: Killed")
             all_moves[i][-1](*all_moves[i][:-1], result[2])
             del all_moves[i]
-        elif result[0] and result[2] > MIN_SPEED_REBOND:
-            rebondir(*all_moves[i], result[-1]);
+        # elif result[0] and result[2] > MIN_SPEED_REBOND:
+        #     rebondir(*all_moves[i], result[-1]);
         else:
             i += 1
 
@@ -155,28 +155,6 @@ def get_right_left_px(px: coordinate, _from: coordinate) -> tuple[coordinate, co
     return actual_right, actual_left
 
 
-def get_angle(ptA: coordinate, ptB: coordinate, pt_inter: coordinate) -> float:
-    """
-    Calcul l'angle entre 2 points
-    :param ptA: Point A (Origine de l'angle), on commence à tracer
-    :param ptB: Point B
-    :param pt_inter: Point Intersection
-    :return: Angle (rad)
-    """
-    # On place ptA à gauche de ptB
-    # if ptA[0] > ptB[0]: ptA, ptB = ptB, ptA
-    if ptA[0] == ptB[0] and ptA[0] == pt_inter[0]:
-        if ptA[1] > pt_inter[1] > ptB[1]:
-            return pi
-        elif ptA[1] < pt_inter[1] < ptB[1]:
-            return -pi
-        else:
-            raise AssertionError("pt A or pt B are the same as pt_inter ")
-    angleB_overX = atan((ptB[1] - pt_inter[1]) / (ptB[0] - pt_inter[0]))
-    angleA_overX = atan((ptA[1] - pt_inter[1]) / (ptA[0] - pt_inter[0]))
-    if angleB_overX < angleA_overX:
-
-
 def get_remote_point_from_curve(full_line: list[coordinate]) -> coordinate:
     """
     Calcul du point pour un calcul de l'angle d'impact.
@@ -196,6 +174,7 @@ def rebondir(*args) -> None:
     Rebond un point et ajout avec addtomove
     :param args: Arguments conventionnel de la gravité
     """
+    pass
     entity = args[3]
     impact_pt = entity.x, entity.y
     ground_pt = args[-1]
