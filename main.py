@@ -41,7 +41,7 @@ map = TileMap(path)
 def_map(map)
 
 flags = pygame.FULLSCREEN | pygame.HWSURFACE
-SCREEN = pygame.display.set_mode(map.dimensions, flags)
+SCREEN = pygame.display.set_mode(map.dimensions)#, flags)
 
 pygame.display.set_caption("PalaVect2")
 
@@ -59,7 +59,8 @@ actual_weapon = 0
 inclinaison = 0.0
 power = 0.1
 
-player = Worm(0,680,358)
+# player = Worm(0,680,358)
+player = Worm(0, 710, 0)
 
 bazooka = Bazooka((map.dimensions[0] // 2)-30, (map.dimensions[1] // 2)-30, "assets/textures/Bazooka.png", -30)
 all_sprites.add(bazooka)

@@ -6,12 +6,12 @@ La translation via des vecteurs vitesses
 from typing import Callable
 from math import atan, pi
 
-from CONSTS import coordinate, MILITICK, NB_PX_LEFT_RIGHT, SENS_DIRECT, SENS_INDIRECT, REMOTE_POINT, MIN_SPEED_REBOND
+from CONSTS import coordinate, MILITICK, NB_PX_LEFT_RIGHT, SENS_DIRECT, SENS_INDIRECT, REMOTE_POINT, MIN_SPEED_BOUNCE, BOUNCING
 from entity import Entity
 from utils import get_full_line
 from map import TileMap
 
-all_moves: list[list[float | float | list[list[bool]] | Entity | bool | int | list[coordinate] | Callable]] = list()
+all_moves: list[list[float | float | Entity | bool | int | list[coordinate] | Callable]] = list()
 map: TileMap | None = None
 
 
@@ -31,7 +31,6 @@ def translation(v_init: float, alpha: float, entity: Entity, force: bool, local_
     Calcul la position d'une Entity au prochain tick
     :param v_init: Vistesse initiale
     :param alpha: angle en radian (sens direct)
-    :param map: map sous le format de Map.map
     :param entity: Entity qui va être modifié
     :param force: Décrit si on est dans la phase initiale de décolage du saut
     :param local_tick: Tick initiale (tick au moment du départ i.e. ce n'est pas zéro)
@@ -41,32 +40,44 @@ def translation(v_init: float, alpha: float, entity: Entity, force: bool, local_
     #               [map[entity.x + X][entity.y + Y] for X in range(-1, 2) for Y in range(-1, 2)]
     #               )
     # if force or not prox:
+    if map[entity.x, entity.y]:
+        raise AssertionError("Worm already in the wall")
+
     for militick in range(0, MILITICK):
-        temp = entity.x, entity.y
+        temp = (entity.x, entity.y)
         entity.move_to(local_tick, v_init, alpha, 1 / MILITICK)
 
-        # if not map[entity.x][entity.y + 1]:
-        #    force = False
-        # print(entity.x)
         if map[entity.x, entity.y]:
             force = False
 
             lst = get_full_line(temp, (entity.x, entity.y))
+
+            if map[temp] or not map[entity.x, entity.y]:
+                print(entity)
+                print(map[entity.x, entity.y])
+                print(map[temp])
+                raise AssertionError("Inner point and outter point are outter before")
+
             if lst[0] == temp:
-                # Extérieur à 0
+                # <=> premier élément à m'extérieur de la map
                 step = 1
                 i = 0
             else:
-                # Exterieur à la fin
+                # <=> dernier élément à m'extérieur de la map
                 step = -1
                 i = len(lst) - 1
 
             impact = lst[i]
-            next_point = lst[i + step]
-            while (not map[lst[i][0], lst[i][1]]) and 0 <= i < len(lst):
+            i += step
+            next_point = lst[i]
+            while (not map[next_point]) and 0 <= i < len(lst):
+                print("mv upper")
                 impact = lst[i]
                 i += step
                 next_point = lst[i]
+
+            if not map[next_point] or map[impact]:
+                raise AssertionError("Inner point and outter point are outter after")
 
             entity.x, entity.y = impact
             trace.append((entity.x, entity.y))
@@ -87,14 +98,22 @@ def move_entities():
         # print(result)
         all_moves[i][-4] = result[1]
         all_moves[i][-3] += 1
-        if result[0] and result[2] < MIN_SPEED_REBOND:
+        if result[0] and result[2] < MIN_SPEED_BOUNCE:
             print("I: Killed")
             all_moves[i][-1](*all_moves[i][:-1], result[2])
+            #print(all_moves[i][2])
             del all_moves[i]
-        elif result[0] and result[2] > MIN_SPEED_REBOND:
-            rebondir(*all_moves[i], result[-1]);
+        elif result[0] and result[2] > MIN_SPEED_BOUNCE:
+            entity = all_moves[i][2]
+            next_point = result[-1]
+            callback = all_moves[i][-1]
+            v_impact = result[2]
+            trace = all_moves[i][-2].copy()
+            del all_moves[i]
+            bounce(entity, next_point, callback, v_impact, trace)
         else:
             i += 1
+
 
 def get_right_left_px(px: coordinate, _from: coordinate) -> tuple[coordinate, coordinate]:
     """
@@ -113,7 +132,7 @@ def get_right_left_px(px: coordinate, _from: coordinate) -> tuple[coordinate, co
 
     # Recherche du début du sens direct pour vérifier _from pixel.
     x, y = px[0] - _from[0], px[1] - _from[1]
-    if ((x, y) not in SENS_DIRECT):
+    if (x, y) not in SENS_DIRECT:
         raise AssertionError("px pixel and _from pixel are not contiguously")
 
     for i in range(NB_PX_LEFT_RIGHT):
@@ -121,13 +140,13 @@ def get_right_left_px(px: coordinate, _from: coordinate) -> tuple[coordinate, co
         # Right first
         ptr = 0
         x, y = actual_right[0] - from_right[0], actual_right[1] - from_right[1]
-        while ((x, y) != SENS_DIRECT[ptr]):
+        while (x, y) != SENS_DIRECT[ptr]:
             ptr += 1
         if not freeze_right:
             for j in range(1, len(SENS_DIRECT)):
                 x, y = SENS_DIRECT[(ptr + j) % len(SENS_DIRECT)]
-                if map[actual_right + x, actual_right + y] and (x, y) not in visited:
-                    ac = (actual_right + x, actual_right + y)
+                if map[actual_right[0] + x, actual_right[1] + y] and (x, y) not in visited:
+                    ac = (actual_right[0] + x, actual_right[1] + y)
                     visited.add(ac)
                     from_right = actual_right
                     actual_right = ac
@@ -143,8 +162,8 @@ def get_right_left_px(px: coordinate, _from: coordinate) -> tuple[coordinate, co
         if not freeze_left:
             for j in range(1, len(SENS_INDIRECT)):
                 x, y = SENS_INDIRECT[(ptr + j) % len(SENS_INDIRECT)]
-                if map[actual_left + x, actual_left + y] and (x, y) not in visited:
-                    ac = (actual_left + x, actual_left + y)
+                if map[actual_left[0] + x, actual_left[1] + y] and (x, y) not in visited:
+                    ac = (actual_left[0] + x, actual_left[1] + y)
                     visited.add(ac)
                     from_left = actual_left
                     actual_left = ac
@@ -155,31 +174,26 @@ def get_right_left_px(px: coordinate, _from: coordinate) -> tuple[coordinate, co
     return actual_right, actual_left
 
 
-def get_angle(ptA: coordinate, ptB: coordinate, pt_inter: coordinate) -> float:
+def get_angle(ptA: coordinate, ptB: coordinate) -> float:
     """
     Calcul l'angle entre 2 points
-    :param ptA: Point A (Origine de l'angle), on commence à tracer
+    :param ptA: Point A (Origine de l'angle)
     :param ptB: Point B
-    :param pt_inter: Point Intersection
     :return: Angle (rad)
     """
-    # On place ptA à gauche de ptB
-    # if ptA[0] > ptB[0]: ptA, ptB = ptB, ptA
-    if ptA[0] == ptB[0] and ptA[0] == pt_inter[0]:
-        if ptA[1] > pt_inter[1] > ptB[1]:
-            return pi
-        elif ptA[1] < pt_inter[1] < ptB[1]:
-            return -pi
+    # On place p1 à gauche de p2
+    if ptA[0] > ptB[0]: ptA, ptB = ptB, ptA
+    if ptA[0] - ptB[0] == 0:
+        if ptA[1] > ptB[1]:
+            return pi / 2
         else:
-            raise AssertionError("pt A or pt B are the same as pt_inter ")
-    angleB_overX = atan((ptB[1] - pt_inter[1]) / (ptB[0] - pt_inter[0]))
-    angleA_overX = atan((ptA[1] - pt_inter[1]) / (ptA[0] - pt_inter[0]))
-    if angleB_overX < angleA_overX:
+            return -pi / 2
+    return atan(ptA[1] - ptB[1]) / (ptA[0] - ptB[0])
 
 
 def get_remote_point_from_curve(full_line: list[coordinate]) -> coordinate:
     """
-    Calcul du point pour un calcul de l'angle d'impact.
+    Calcul du point antérieur de la courbe pour un calcul de l'angle d'impact.
     :param full_line: Liste des derniers points dans l'ordre anti-chronologique
     :return: remote point
     """
@@ -189,18 +203,22 @@ def get_remote_point_from_curve(full_line: list[coordinate]) -> coordinate:
         return full_line[-REMOTE_POINT]
 
 
-#v_init: float, alpha: float, entity: Entity, force: bool, local_tick: int, trace: list[coordinate]
-#list[float | float | list[list[bool]] | Entity | bool | int | list[coordinate] | Callable | coordinate]
-def rebondir(*args) -> None:
+# v_init: float, alpha: float, entity: Entity, force: bool, local_tick: int, trace: list[coordinate]
+# list[float | float | Entity | bool | int | list[coordinate] | Callable | coordinate]
+def bounce(entity: Entity, next_point: coordinate, callback : Callable, v_impact, trace) -> None:
     """
     Rebond un point et ajout avec addtomove
     :param args: Arguments conventionnel de la gravité
     """
-    entity = args[3]
+    entity = entity
     impact_pt = entity.x, entity.y
-    ground_pt = args[-1]
+    print(entity, impact_pt)
+    ground_pt = next_point
     r_pix, l_pix = get_right_left_px(impact_pt, ground_pt)
-    surf_angle = get_angle(r_pix, l_pix)
-    trajectory_angle = get_angle(get_remote_point_from_curve(args[6]), l_pix)
-    impact_angle = trajectory_angle - surf_angle
-    pass
+    better_x, better_y = impact_pt[0] - (r_pix[0] - l_pix[0]), impact_pt[1] - (r_pix[1] - l_pix[1])  # creating parallel to r_pix l_pix
+    butter_l_pix: coordinate = (better_x, better_y)
+    surf_angle = get_angle(impact_pt, butter_l_pix)
+    trajectory_angle = get_angle(get_remote_point_from_curve(trace), butter_l_pix)
+    impact_angle = trajectory_angle + surf_angle
+    addtomove(BOUNCING*v_impact, -impact_angle, entity, callback) #
+

@@ -86,7 +86,7 @@ class Worm(Entity):
 
 
         """ pour le deplacement sur les surface inclinés: prendre la colone
-        pixel à droite ou gauch (selon le input), parcourir cet colone pour trouver
+        pixel à droite ou gauche (selon le input), parcourir cet colone pour trouver
         les points de contour (les pixel True apres un false). Ensuite faire la différence
         de y de ces points avec le y du joueur pour trouver le point de contour le plus proche."""
 
