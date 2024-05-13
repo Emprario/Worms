@@ -203,9 +203,7 @@ while run:
         if charge < 1:
             charg_bar.up_taille(1.5)
 
-<<<<<<< HEAD
     # Execution des explosions
-=======
     if get_axis !=0 :
         if get_axis==-1:
             inclinaison += 0.015
@@ -227,8 +225,6 @@ while run:
         fleche.rotate(-inclinaison * 360 / (2 * pi))
         fleche.move_with_rota(inclinaison)
 
-
->>>>>>> 89175cc (weapon V3 avec fleche, png, et rotation d'arme)
     map.void_destruction_stack()
 
     move_entities()
