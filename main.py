@@ -63,7 +63,7 @@ inclinaison = 0.0
 power = 0.1
 get_axis = 0
 
-# player = Worm(0,680,358)
+player = Worm(0,680,358)
 
 bazooka = Bazooka((map.dimensions[0] // 2)-25, (map.dimensions[1] // 2)-25, "assets/textures/Bazooka2.png", 0,-40,  50)
 bazooka.move_with_rota(inclinaison)
@@ -77,11 +77,13 @@ fleche.move_with_rota(inclinaison)
 run = True
 while run:
     destruction = ()
+
     if debug_switch:
         map.print_map()
     else:
         map.blit_texture()
     SCREEN.blit(map.Surf, (0, 0))
+
 
     for event in pygame.event.get():
         if event.type == pygame.KEYDOWN:
@@ -190,14 +192,8 @@ while run:
             pygame.quit()
             exit(1)
 
-    # Upadte dezs sprites
+    # Upadte des sprites
     for sprite in all_sprites:
-        # if isinstance(projectile, Projectile) and projectile.launched:
-        #     collisions = pygame.sprite.spritecollide(projectile, obstacles, True)
-        #     if collisions:
-        #         projectile.kill()
-        # Affichage
-        # print(sprite.x, sprite.y)
         SCREEN.blit(sprite.image, (sprite.x, sprite.y))
 
     if charg_bar.agrandissement == True:
@@ -205,6 +201,7 @@ while run:
         if charge < 1:
             charg_bar.up_taille(1.5)
 
+<<<<<<< HEAD
     if get_axis !=0 :
         if get_axis==-1:
             inclinaison += 0.015
@@ -227,32 +224,35 @@ while run:
         fleche.move_with_rota(inclinaison)
 
 
+=======
+    # Execution des explosions
+>>>>>>> b91a0457d7963e3992b8b1084cab4a43b71b962b
     map.void_destruction_stack()
+
     i = 0
-    # bug actuel : out of range au bout de 10 sec environ
     while i < len(all_moves):
         print(tick, [move[3] for move in all_moves])
         result = translation(*all_moves[i][:-2], tick - all_moves[i][-2])
         # print(result)
         all_moves[i][-3] = result[1]
         if result[0]:
-            print("Killed")
+            print("I: Killed")
             all_moves[i][-1](*all_moves[i][:-1], result[2])
             del all_moves[i]
         else:
             i += 1
 
-    # ------------- Worms part ---------------------
-    # x_movement = 0
-    # keys = pygame.key.get_pressed()
-    # if keys[pygame.K_LEFT]:
-    #     x_movement = -2
-    # if keys[pygame.K_RIGHT]:
-    #     x_movement = 2
-    # player.move_worm(x_movement, 0, map.map, all_moves, tick)
-    # player.draw(SCREEN)
-    # ----------------------------------------------
-
+    #------------- Worms part ---------------------
+    x_movement = 0
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_LEFT]:
+        x_movement = -2
+    if keys[pygame.K_RIGHT]:
+        x_movement = 2
+    player.move_worm(x_movement, 0, map.map, all_moves, tick)
+    player.draw(SCREEN)
+    #----------------------------------------------
+    
     pygame.display.flip()
     Oclock.tick(FRAMERATE)
     tick += 1

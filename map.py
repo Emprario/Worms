@@ -17,12 +17,13 @@ from utils import get_full_line, get_circle
 
 # from time import time
 
+# Increase by a lot the recursion limit to make algo_peinture working
 setrecursionlimit(9000000)
 
 
 def gen_segmented_map(vectmap: list[list[coordinate]]) -> list[list[coordinate]]:
     """
-    Génère une map avec les points donnés relié entre-eux deux à deux
+    Génère une map avec les points donnés reliée entre-eux deux à deux
     :param vectmap: Map vectoriel composé de points isolé
     :return: Map segmenté avec des lignes continues avec des formes non pleines
     """
@@ -38,6 +39,15 @@ def gen_segmented_map(vectmap: list[list[coordinate]]) -> list[list[coordinate]]
 
 def algo_peinture(segmap: list[list[coordinate]], fmap: list[list[bool]], centers: list[coordinate],
                   dim: list[int], base: bool = False):
+    """
+    Algorithme récursif qui prend en paramètre une map segmenté comme contour et une map sur laquelle dessiner le non base
+    :param segmap: liste de contours qui sont des listes de coordinates
+    :param fmap: Map sur laquelle dessiner le non base
+    :param centers: Points de départs des dessins
+    :param dim: Dimensions de la map
+    :param base: parité par défaut qui sera modifié
+    """
+
     def fill_neighbours(point: coordinate, segform: set[coordinate]):
         # print(segform)
         fmap[point[0]][point[1]] = not base
@@ -61,20 +71,24 @@ class TileMap:
         Constructeur de la classe
         :param mappath: Chemin (relatif depuis la root du projet) vers la map
         """
+
+        """
+        Initialisation
+        Déclaration des variables globals
+        """
         self.map: list[list[bool]] = []  # [x][y]
-        self.texture: list[int] | None = None  # Invalid texture is None - debug // list[int] is bytes to print img
-        self.fond: list[int] | None = None
+        self.texture: list[int] = []
+        self.fond: list[int] = []
         self.dimensions: list[int] = [0, 0]
-        self.form_borders: list[list[coordinate]] = []
         self.destruction_stack: list[tuple[coordinate, float]] = []
         self.ONMAPs: dict[int, list[list[bool]]] = {i: [] for i in range(SIMULTANITY_THRESHOLD)}
         self.available_ONMAPs: [int] = []
         self.clear_ONMAPs: [int] = [i for i in range(SIMULTANITY_THRESHOLD)]
         self.reset_ONMAP_thread: Thread | None = None
         self.px_update_list: set[int] = set()
-        self.Surf = None
 
         # Step 1: Extract vectorial map
+        self.Surf: pygame.Surface = None
 
         """
         Load map from file.
@@ -181,15 +195,13 @@ class TileMap:
         ### INTERLUDE ###
         self.reset_ONMAP_thread = Thread(group=None, target=self.__reset_ONMAP, name=None)
         self.reset_ONMAP_thread.start()
-        while len(self.available_ONMAPs) < MIN_SIMULTANITY_THRESHOLD:
-            continue
 
         self.Surf = pygame.Surface((self.dimensions[0], self.dimensions[1]))
         ###   #####   ###
 
         # Step2: Obtain segmented map
 
-        self.form_borders: list[list[coordinate]] = gen_segmented_map(vectmap)
+        form_borders: list[list[coordinate]] = gen_segmented_map(vectmap)
 
         # more = {point for lstpoint in segmap for point in lstpoint}
         # skelmap = [[(x,y) in more for y in range(self.dimensions[1])] for x in range(self.dimensions[0])]
@@ -205,7 +217,7 @@ class TileMap:
         # Step 3: Fill the map !
         self.clear_map()
 
-        for form in self.form_borders:
+        for form in form_borders:
 
             # Step 3.1 Order points by x then y in a dict
             # it's a set because 'in' operator in set is O(1) in python same for dicts
@@ -322,6 +334,8 @@ class TileMap:
                         elif x not in Hdict[y]:
                             self.map[x][y] = inside
 
+        while len(self.available_ONMAPs) < MIN_SIMULTANITY_THRESHOLD:
+            continue
         self.__filter_image(0, len(self.texture), arbitrary=True)
 
     def __getitem__(self, item: coordinate) -> bool:
