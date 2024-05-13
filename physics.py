@@ -41,6 +41,7 @@ def translation(v_init: float, alpha: float, entity: Entity, force: bool, local_
     #               )
     # if force or not prox:
     if map[entity.x, entity.y]:
+        print(entity)
         raise AssertionError("Worm already in the wall")
 
     for militick in range(0, MILITICK):
@@ -101,7 +102,7 @@ def move_entities():
         if result[0] and result[2] < MIN_SPEED_BOUNCE:
             print("I: Killed")
             all_moves[i][-1](*all_moves[i][:-1], result[2])
-            #print(all_moves[i][2])
+            print(all_moves[i][2])
             del all_moves[i]
         elif result[0] and result[2] > MIN_SPEED_BOUNCE:
             entity = all_moves[i][2]

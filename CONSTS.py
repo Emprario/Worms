@@ -30,3 +30,5 @@ SENS_INDIRECT = SENS_DIRECT[::-1]   # Défini le sens indirect (selon l'orientat
 REMOTE_POINT = 10                   # Défini le nombre de point qu'il remonter à l'arrière
 MIN_SPEED_BOUNCE = pi               # Défini la speed minimum pour rebondir
 BOUNCING = 0.2
+FALL_LIMIT = 20
+AUTO_MOUNT = 3
