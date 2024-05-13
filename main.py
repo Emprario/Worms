@@ -30,13 +30,12 @@ class Game:
     def __init__(self):
         pygame.init()
         pygame.display.set_caption("PalaVect2")
-
         self.path = "assets/map/01.map"
         self.map = TileMap(self.path)
 
         # flags = pygame.FULLSCREEN | pygame.HWSURFACE
         self.SCREEN = pygame.display.set_mode(self.map.dimensions)  # , flags)
-        self.ACTIVE_MENU: Menu = None
+        self.ACTIVE_MENU: Menu = Menu("Loading", MENU_SIZE[0], MENU_SIZE[1], pygame.image.load("assets/menu/backgrounds/loading.png").convert_alpha(), [])
 
         self.Oclock = pygame.time.Clock()
         self.tick = 0
@@ -47,26 +46,38 @@ class Game:
         self.all_sprites: set[Entity] = set()
 
         self.current_player = 0
-        self.players: list[Worm] = [Worm(0, 680, 358), Worm(0, 950, 358)]
+        self.players: list[Worm] = [Worm(0, 680, 358), Worm(0, 1300, 358)]
 
         self.running = False
         self.pause = False
 
+        self.MAIN_MENU = None
         self.PAUSE_MENU = None
         self.create_menus()
 
     def create_menus(self):
-        resume_button = Button(304, 125, pygame.image.load("assets/menu/buttons/resume.png").convert_alpha(), 1,
-                               self.exit_menu)
-        options_button = Button(297, 250, pygame.image.load("assets/menu/buttons/options.png").convert_alpha(), 1,
-                                None)
-        quit_button = Button(336, 375, pygame.image.load("assets/menu/buttons/quit.png").convert_alpha(), 1,
-                             self.exit_game)
+        resume_button = Button(self.SCREEN.get_width() // 2 - 105, self.SCREEN.get_height() // 2 - 44 - 100,
+                               pygame.image.load("assets/menu/buttons/resume.png").convert_alpha(), 1, self.exit_menu)
+        options_button = Button(self.SCREEN.get_width() // 2 - 105, self.SCREEN.get_height() // 2 - 44,
+                                pygame.image.load("assets/menu/buttons/options.png").convert_alpha(), 1, None)
+        quit_button = Button(self.SCREEN.get_width() // 2 - 105, self.SCREEN.get_height() // 2 - 44 + 100,
+                             pygame.image.load("assets/menu/buttons/quit.png").convert_alpha(), 1, self.exit_game)
+        play_button = Button(self.SCREEN.get_width() // 2 - 210, self.SCREEN.get_height() // 2 - 44 + 200,
+                             pygame.image.load("assets/menu/buttons/play.png").convert_alpha(), 2, self.exit_menu)
 
-        self.PAUSE_MENU = Menu("Pause", MENU_SIZE[0], MENU_SIZE[1], None, [resume_button, options_button, quit_button])
+        self.PAUSE_MENU = Menu("Pause", MENU_SIZE[0], MENU_SIZE[1],
+                               pygame.image.load("assets/menu/backgrounds/pause.png").convert_alpha(),
+                               [resume_button, options_button, quit_button])
+        self.MAIN_MENU = Menu("Main", MENU_SIZE[0], MENU_SIZE[1],
+                              pygame.image.load("assets/menu/backgrounds/main.png").convert_alpha(),
+                              [play_button, options_button, quit_button])
 
     def exit_game(self):
         self.running = False
+
+    def set_active_menu(self, menu: Menu):
+        self.ACTIVE_MENU = menu
+        self.ACTIVE_MENU.draw(self.SCREEN)
 
     def exit_menu(self):
         self.ACTIVE_MENU = None
@@ -77,15 +88,19 @@ class Game:
 
     def run(self):
         self.running = True
+        self.set_active_menu(self.MAIN_MENU)
         for player in self.players:
             self.all_sprites.add(player)
 
-        # ----------------- Boucle principale --------------------
+        # ----------------- Boucle principale -------------------
         while self.running:
             if self.ACTIVE_MENU is not None:
                 for event in pygame.event.get():
                     if event.type == pygame.MOUSEBUTTONDOWN:
-                        self.ACTIVE_MENU.onClick(pygame.mouse.get_pos())
+                        self.ACTIVE_MENU.on_click(pygame.mouse.get_pos())
+                    # elif event.type == pygame.KEYDOWN:
+                    #     if event.key == pygame.K_ESCAPE or event.key == pygame.K_p:
+                    #         self.exit_menu()
             else:
                 self.map.blit_texture()
                 self.SCREEN.blit(self.map.Surf, (0, 0))
@@ -99,11 +114,10 @@ class Game:
                             print("To clean :", self.map.clear_ONMAPs)
                         elif event.key == pygame.K_m:
                             self.next_player()
-                        elif event.key == pygame.K_ESCAPE:
+                        elif event.key == pygame.K_DELETE:
                             self.exit_game()
-                        elif event.key == pygame.K_p:
-                            self.ACTIVE_MENU = self.PAUSE_MENU
-                            self.ACTIVE_MENU.draw(self.SCREEN)
+                        elif event.key == pygame.K_ESCAPE or event.key == pygame.K_p:
+                            self.set_active_menu(self.PAUSE_MENU)
                         # elif event.key == pygame.K_f:
                         #    self.map = TileMap(self.path)
                         #    self.map.blit_texture(all_pxs=True)
@@ -142,12 +156,9 @@ class Game:
                         i += 1
 
                 # -------------- Actualisation pygame --------------------
-                pygame.display.flip()
                 self.Oclock.tick(FRAMERATE)
                 self.tick += 1
-
-                # if fps != Oclock.get_fps() and (fps := Oclock.get_fps()) < 60 and fps != 0:
-                #    print(f"/!\\ Low tick /!\\ framerate@{fps}")
+            pygame.display.flip()
         pygame.quit()
 
 

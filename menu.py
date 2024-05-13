@@ -17,10 +17,9 @@ class Button:
     def draw(self, screen: Surface):
         screen.blit(self.image, (self.rect.x, self.rect.y))
 
-    def onClick(self, mouse: tuple[int, int]):
+    def on_click(self, mouse: tuple[int, int]):
         if self.rect.collidepoint(mouse):
-            if pygame.mouse.get_pressed()[0] == 1:
-                self.action()
+            self.action()
 
 
 class Menu:
@@ -28,15 +27,16 @@ class Menu:
         self.title = title
         self.width = width
         self.height = height
-        self.background = background
-        self.buttons = buttons
+        self.background = pygame.transform.scale(background, (width, height))
+        self.buttons: list[Button] = buttons
 
     def draw(self, screen: Surface):
+        #pygame.draw.rect(screen, (24, 0, 0, 1), (0, 0, self.width, self.height))
+        screen.blit(self.background, (0, 0))
         print("Drawing menu : " + self.title)
         for button in self.buttons:
             button.draw(screen)
 
-    def onClick(self, mouse: tuple[int, int]):
+    def on_click(self, mouse: tuple[int, int]):
         for button in self.buttons:
-            button.onClick(mouse)
-
+            button.on_click(mouse)
