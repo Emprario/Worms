@@ -99,6 +99,10 @@ def move_entities():
         # print(result)
         all_moves[i][-4] = result[1]
         all_moves[i][-3] += 1
+        if result[0] and result[2] < MIN_SPEED_BOUNCE:
+            print("I: Killed")
+            all_moves[i][-1](*all_moves[i][:-1], result[2])
+            del all_moves[i]
         elif result[0] and result[2] > MIN_SPEED_BOUNCE:
             entity = all_moves[i][2]
             next_point = result[-1]
