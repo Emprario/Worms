@@ -99,11 +99,6 @@ def move_entities():
         # print(result)
         all_moves[i][-4] = result[1]
         all_moves[i][-3] += 1
-        if result[0] and result[2] < MIN_SPEED_BOUNCE:
-            print("I: Killed")
-            all_moves[i][-1](*all_moves[i][:-1], result[2])
-            print(all_moves[i][2])
-            del all_moves[i]
         elif result[0] and result[2] > MIN_SPEED_BOUNCE:
             entity = all_moves[i][2]
             next_point = result[-1]
@@ -112,6 +107,8 @@ def move_entities():
             trace = all_moves[i][-2].copy()
             del all_moves[i]
             bounce(entity, next_point, callback, v_impact, trace)
+        # elif result[0] and result[2] > MIN_SPEED_REBOND:
+        #     rebondir(*all_moves[i], result[-1]);
         else:
             i += 1
 
@@ -175,6 +172,7 @@ def get_right_left_px(px: coordinate, _from: coordinate) -> tuple[coordinate, co
     return actual_right, actual_left
 
 
+
 def get_angle(ptA: coordinate, ptB: coordinate) -> float:
     """
     Calcul l'angle entre 2 points
@@ -191,7 +189,7 @@ def get_angle(ptA: coordinate, ptB: coordinate) -> float:
             return -pi / 2
     return atan(ptA[1] - ptB[1]) / (ptA[0] - ptB[0])
 
-
+  
 def get_remote_point_from_curve(full_line: list[coordinate]) -> coordinate:
     """
     Calcul du point antérieur de la courbe pour un calcul de l'angle d'impact.
@@ -211,7 +209,6 @@ def bounce(entity: Entity, next_point: coordinate, callback : Callable, v_impact
     Rebond un point et ajout avec addtomove
     :param args: Arguments conventionnel de la gravité
     """
-    entity = entity
     impact_pt = entity.x, entity.y
     print(entity, impact_pt)
     ground_pt = next_point
