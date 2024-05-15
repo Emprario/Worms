@@ -22,7 +22,9 @@ from map import TileMap
 from debug_utils import get_time_incache
 from menu import Button, Menu, Text
 from CONSTS import FRAMERATE, WINDOW_SIZE, GAME_NAME
-from physics import all_moves, translation
+from physics import move_entities, addtomove, def_map
+from weapon import Pro_bazooka, Bazooka, Pro_sniper, Pro_grenade, Pro_frag_grenade, Charg_bar, Sniper, Grenade, Grenade_frag, Fleche
+from math import pi
 from utils import get_circle
 from worms import Worm
 
@@ -41,6 +43,7 @@ class Game:
 
         self.path = "assets/map/01.map"
         self.map = TileMap(self.path)
+        def_map(self.map)
 
         self.Oclock = pygame.time.Clock()
         self.tick = 0
@@ -49,6 +52,12 @@ class Game:
         self.map.blit_texture(all_pxs=True)
 
         self.all_sprites: set[Entity] = set()
+        
+        //TODO
+        self.actual_weapon = 0
+        self.inclinaison = 0.0
+        self.power = 0.1
+        self.get_axis = 0
 
         self.current_player = 0
         self.players: list[Worm] = [Worm(0, 680, 358), Worm(0, 1300, 358)]
@@ -107,6 +116,13 @@ class Game:
         for player in self.players:
             self.all_sprites.add(player)
 
+        bazooka = Bazooka((map.dimensions[0] // 2)-25, (map.dimensions[1] // 2)-25, "assets/textures/Bazooka2.png", 0,-40,  50)
+        self.all_sprites.add(bazooka)
+        charg_bar = Charg_bar((map.dimensions[0] // 2)-30, (map.dimensions[1] // 2)-60)
+        self.all_sprites.add(charg_bar)
+        fleche = Fleche((map.dimensions[0] // 2)-25, (map.dimensions[1] // 2)-20, "assets/textures/Fleche.png", 0,  50)
+        self.all_sprites.add(fleche)
+            
         # ----------------- Boucle principale -------------------
         while self.running:
             if self.active_menu is not None:
@@ -133,9 +149,87 @@ class Game:
                             self.exit_game()
                         elif event.key == pygame.K_ESCAPE or event.key == pygame.K_p:
                             self.set_active_menu(self.PAUSE_MENU)
-                        # elif event.key == pygame.K_f:
-                        #    self.map = TileMap(self.path)
-                        #    self.map.blit_texture(all_pxs=True)
+                        elif event.key == pygame.K_e:
+                            if actual_weapon <= 2:
+                                actual_weapon += 1
+                            else:
+                                actual_weapon = 0
+                            match actual_weapon:
+                                case 0:
+                                    bazooka = Bazooka((map.dimensions[0] // 2) - 25, (map.dimensions[1] // 2) - 25,
+                                                      "assets/textures/Bazooka2.png", -inclinaison*360/(2*pi), -40, 50)
+                                    bazooka.move_with_rota(inclinaison, player.x, player.y)
+                                    all_sprites.add(bazooka)
+                                    grenade_frag.kill()
+                                case 1 :
+                                    sniper = Sniper((map.dimensions[0] // 2) - 25, (map.dimensions[1] // 2) - 25,
+                                                      "assets/textures/Sniper.png", -inclinaison*360/(2*pi), 0, 50)
+                                    sniper.move_with_rota(inclinaison, player.x, player.y)
+                                    all_sprites.add(sniper)
+                                    bazooka.kill()
+                                case 2 :
+                                    grenade = Grenade((map.dimensions[0] // 2) - 25, (map.dimensions[1] // 2) - 25,
+                                                      "assets/textures/Grenade.png", -inclinaison*360/(2*pi), 0, 50)
+                                    grenade.move_with_rota(inclinaison, player.x, player.y)
+                                    all_sprites.add(grenade)
+                                    sniper.kill()
+                                case 3 :
+                                    grenade_frag = Grenade_frag((map.dimensions[0] // 2) - 25, (map.dimensions[1] // 2) -25,
+                                                      "assets/textures/Grenade_frag.png", -inclinaison*360/(2*pi), 0, 50)
+                                    grenade_frag.move_with_rota(inclinaison, player.x, player.y)
+                                    all_sprites.add(grenade_frag)
+                                    grenade.kill()
+                                # elif event.key == pygame.K_f:
+                                #    self.map = TileMap(self.path)
+                                #    self.map.blit_texture(all_pxs=True)
+                        elif event.key == pygame.K_UP or event.key == pygame.K_DOWN:
+                            if event.key == pygame.K_DOWN:
+                                get_axis = -1
+                            else:
+                                get_axis =1
+                        elif event.key == pygame.K_SPACE:
+                            if actual_weapon == 1:
+                                pro_sniper = Pro_sniper(int(round(sniper.x+25)), int(round(sniper.y+25)), "assets/textures/Explosion.png", map.destruction_stack,120, 8, False)
+                                all_sprites.add(pro_sniper)
+                                addtomove(power * pro_sniper.speed, inclinaison, pro_sniper, pro_sniper.destroy)
+                                pro_sniper.launched = True
+                                print("missile launched")
+                            if actual_weapon == 0 or actual_weapon == 2 or actual_weapon == 3:
+                                power = -tick * 0.015
+                                charg_bar.agrandissement = True
+                                charge = power
+                                charg_bar.up_taille(10,player.x,player.y)
+                    if event.type == pygame.KEYUP:
+                        if event.key == pygame.K_SPACE:
+                            power += tick * 0.015 + 0.2
+                            if power > 1:
+                                power = 1
+                            if actual_weapon == 0:
+                                pro_bazooka = Pro_bazooka(int(round(bazooka.x+25)), int(round(bazooka.y+25)), "assets/textures/Explosion.png", map.destruction_stack,12,25,False)
+                                all_sprites.add(pro_bazooka)
+                                addtomove(power * pro_bazooka.speed, inclinaison, pro_bazooka, pro_bazooka.destroy)
+                                pro_bazooka.launched = True
+                            elif actual_weapon == 2:
+                                pro_grenade = Pro_grenade(int(round(grenade.x+25)), int(round(grenade.y+25)), "assets/textures/Grenade.png", map.destruction_stack,7, 20, True)
+                                all_sprites.add(pro_grenade)
+                                addtomove(power * pro_grenade.speed, inclinaison, pro_grenade, pro_grenade.destroy)
+                                pro_grenade.launched = True
+                            elif actual_weapon == 3:
+                                pro_frag_grenade = Pro_frag_grenade(int(round(grenade_frag.x+25)), int(round(grenade_frag.y+25)), "assets/textures/Grenade_frag.png",map.destruction_stack, 7,20,True)
+                                all_sprites.add(pro_frag_grenade)
+                                addtomove(power * pro_frag_grenade.speed, inclinaison, pro_frag_grenade, pro_frag_grenade.destroy)
+                                pro_frag_grenade.launched = True
+                            power = 0.2
+                            print("missile launched")
+                            charg_bar.agrandissement=False
+                            charg_bar.reset_taille()
+
+
+                        elif event.key == pygame.K_UP or event.key == pygame.K_DOWN:
+                            if event.key == pygame.K_DOWN:
+                                get_axis = 0
+                            else:
+                                get_axis = 0
                     elif event.type == pygame.MOUSEBUTTONDOWN:
                         print("Mouse point @", pygame.mouse.get_pos())
                         circle = get_circle(5, pos := pygame.mouse.get_pos(), radius := 40)
@@ -148,8 +242,60 @@ class Game:
                 for sprite in self.all_sprites:
                     self.SCREEN.blit(sprite.image, (sprite.x - sprite.offset_x, sprite.y - sprite.offset_y))
 
+                if charg_bar.agrandissement == True:
+                    charge = power + tick * 0.015 + 0.2
+                    if charge < 1:
+                        charg_bar.up_taille(1.5,player.x,player.y)
+                        
+                if get_axis !=0 :
+                    if get_axis==-1:
+                        inclinaison += 0.015
+                    else:
+                        inclinaison -= 0.015
+                    #modif coordonnees des armes
+                    match actual_weapon:
+                        case 0:
+                            bazooka.rotate(-inclinaison * 360 / (2 * pi))
+                            bazooka.move_with_rota(inclinaison, player.x, player.y)
+                        case 1:
+                            sniper.rotate(-inclinaison * 360 / (2 * pi))
+                            sniper.move_with_rota(inclinaison, player.x, player.y)
+                        case 2:
+                            grenade.rotate(-inclinaison * 360 / (2 * pi))
+                            grenade.move_with_rota(inclinaison, player.x, player.y)
+                        case 3:
+                            grenade_frag.rotate(-inclinaison * 360 / (2 * pi))
+                            grenade_frag.move_with_rota(inclinaison, player.x, player.y)
+                    fleche.rotate(-inclinaison * 360 / (2 * pi))
+                    fleche.move_with_rota(inclinaison, player.x, player.y)
+                    charg_bar.moove_bar(player.x,player.y)
+        
                 # ------------- Execution des explosions -----------------
+          
+                if get_axis !=0 :
+                    if get_axis==-1:
+                        inclinaison += 0.015
+                    else:
+                        inclinaison -= 0.015
+                    match actual_weapon:
+                        case 0:
+                            bazooka.rotate(-inclinaison * 360 / (2 * pi))
+                            bazooka.move_with_rota(inclinaison, player.x, player.y)
+                        case 1:
+                            sniper.rotate(-inclinaison * 360 / (2 * pi))
+                            sniper.move_with_rota(inclinaison, player.x, player.y)
+                        case 2:
+                            grenade.rotate(-inclinaison * 360 / (2 * pi))
+                            grenade.move_with_rota(inclinaison, player.x, player.y)
+                        case 3:
+                            grenade_frag.rotate(-inclinaison * 360 / (2 * pi))
+                            grenade_frag.move_with_rota(inclinaison, player.x, player.y)
+                    fleche.rotate(-inclinaison * 360 / (2 * pi))
+                    fleche.move_with_rota(inclinaison, player.x, player.y)
+                
                 self.map.void_destruction_stack()
+                
+                move_entities()
 
                 # ------------- Mouvement des joueurs --------------------
                 x_movement = 0
@@ -158,10 +304,14 @@ class Game:
                     x_movement = -2
                 if keys[pygame.K_d]:
                     x_movement = 2
-                self.players[self.current_player].move_worm(x_movement, 0, self.map.map, all_moves, self.tick)
+                self.players[self.current_player].move_worm(x_movement, 0, self.map.map)
+                if keys[pygame.K_z]:
+                    self.players[self.current_player].jump_worm(tick, map.map)
                 for i in range(len(self.players)):
                     if i != self.current_player:
-                        self.players[i].move_worm(0, 0, self.map.map, all_moves, self.tick)
+                        self.players[i].move_worm(0, 0, self.map.map)
+
+                #player.draw(SCREEN)
 
                 # ------------- Déplacement des Entités ------------------
                 i = 0

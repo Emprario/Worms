@@ -3,11 +3,11 @@ Outils de debug pour pygame
 """
 import pygame
 
-SIZE = (1920, 1080)
+#SIZE = (1920, 1080)
 
-pygame.init()
-DEBUG_SCREEN = pygame.display.set_mode(SIZE)
-pygame.display.set_caption("Debug screen")
+#pygame.init()
+#DEBUG_SCREEN = pygame.display.set_mode(SIZE)
+#pygame.display.set_caption("Debug screen")
 
 
 def get_point_from_idx(idx: int) -> tuple[int, int]:
