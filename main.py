@@ -68,13 +68,13 @@ get_axis = 0
 player = Worm(0, 710, 0)
 
 bazooka = Bazooka((map.dimensions[0] // 2)-25, (map.dimensions[1] // 2)-25, "assets/textures/Bazooka2.png", 0,-40,  50)
-bazooka.move_with_rota(inclinaison)
+bazooka.move_with_rota(inclinaison, player.x, player.y)
 all_sprites.add(bazooka)
 charg_bar = Charg_bar((map.dimensions[0] // 2)-30, (map.dimensions[1] // 2)-60)
 all_sprites.add(charg_bar)
 fleche = Fleche((map.dimensions[0] // 2)-25, (map.dimensions[1] // 2)-20, "assets/textures/Fleche.png", 0,  50)
 all_sprites.add(fleche)
-fleche.move_with_rota(inclinaison)
+fleche.move_with_rota(inclinaison, player.x, player.y)
 
 run = True
 while run:
@@ -110,25 +110,25 @@ while run:
                     case 0:
                         bazooka = Bazooka((map.dimensions[0] // 2) - 25, (map.dimensions[1] // 2) - 25,
                                           "assets/textures/Bazooka2.png", -inclinaison*360/(2*pi), -40, 50)
-                        bazooka.move_with_rota(inclinaison)
+                        bazooka.move_with_rota(inclinaison, player.x, player.y)
                         all_sprites.add(bazooka)
                         grenade_frag.kill()
                     case 1 :
                         sniper = Sniper((map.dimensions[0] // 2) - 25, (map.dimensions[1] // 2) - 25,
                                           "assets/textures/Sniper.png", -inclinaison*360/(2*pi), 0, 50)
-                        sniper.move_with_rota(inclinaison)
+                        sniper.move_with_rota(inclinaison, player.x, player.y)
                         all_sprites.add(sniper)
                         bazooka.kill()
                     case 2 :
                         grenade = Grenade((map.dimensions[0] // 2) - 25, (map.dimensions[1] // 2) - 25,
                                           "assets/textures/Grenade.png", -inclinaison*360/(2*pi), 0, 50)
-                        grenade.move_with_rota(inclinaison)
+                        grenade.move_with_rota(inclinaison, player.x, player.y)
                         all_sprites.add(grenade)
                         sniper.kill()
                     case 3 :
                         grenade_frag = Grenade_frag((map.dimensions[0] // 2) - 25, (map.dimensions[1] // 2) -25,
                                           "assets/textures/Grenade_frag.png", -inclinaison*360/(2*pi), 0, 50)
-                        grenade_frag.move_with_rota(inclinaison)
+                        grenade_frag.move_with_rota(inclinaison, player.x, player.y)
                         all_sprites.add(grenade_frag)
                         grenade.kill()
             elif event.key == pygame.K_UP or event.key == pygame.K_DOWN:
@@ -141,7 +141,7 @@ while run:
 
             elif event.key == pygame.K_SPACE:
                 if actual_weapon == 1:
-                    pro_sniper = Pro_sniper(int(round(sniper.x+25)), int(round(sniper.y+25)), "assets/textures/Explosion.png", map.destruction_stack,25, 8, False)
+                    pro_sniper = Pro_sniper(int(round(sniper.x+25)), int(round(sniper.y+25)), "assets/textures/Explosion.png", map.destruction_stack,120, 8, False)
                     all_sprites.add(pro_sniper)
                     addtomove(power * pro_sniper.speed, inclinaison, pro_sniper, pro_sniper.destroy)
                     pro_sniper.launched = True
@@ -151,7 +151,7 @@ while run:
                     power = -tick * 0.015
                     charg_bar.agrandissement = True
                     charge = power
-                    charg_bar.up_taille(10)
+                    charg_bar.up_taille(10,player.x,player.y)
 
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_SPACE:
@@ -201,7 +201,32 @@ while run:
     if charg_bar.agrandissement == True:
         charge = power + tick * 0.015 + 0.2
         if charge < 1:
-            charg_bar.up_taille(1.5)
+            charg_bar.up_taille(1.5,player.x,player.y)
+
+
+    if get_axis !=0 :
+        if get_axis==-1:
+            inclinaison += 0.015
+        else:
+            inclinaison -= 0.015
+    #modif coordonnees des armes
+    match actual_weapon:
+        case 0:
+            bazooka.rotate(-inclinaison * 360 / (2 * pi))
+            bazooka.move_with_rota(inclinaison, player.x, player.y)
+        case 1:
+            sniper.rotate(-inclinaison * 360 / (2 * pi))
+            sniper.move_with_rota(inclinaison, player.x, player.y)
+        case 2:
+            grenade.rotate(-inclinaison * 360 / (2 * pi))
+            grenade.move_with_rota(inclinaison, player.x, player.y)
+        case 3:
+            grenade_frag.rotate(-inclinaison * 360 / (2 * pi))
+            grenade_frag.move_with_rota(inclinaison, player.x, player.y)
+    fleche.rotate(-inclinaison * 360 / (2 * pi))
+    fleche.move_with_rota(inclinaison, player.x, player.y)
+    charg_bar.moove_bar(player.x,player.y)
+
 
     # Execution des explosions
     if get_axis !=0 :
@@ -212,18 +237,18 @@ while run:
         match actual_weapon:
             case 0:
                 bazooka.rotate(-inclinaison * 360 / (2 * pi))
-                bazooka.move_with_rota(inclinaison)
+                bazooka.move_with_rota(inclinaison, player.x, player.y)
             case 1:
                 sniper.rotate(-inclinaison * 360 / (2 * pi))
-                sniper.move_with_rota(inclinaison)
+                sniper.move_with_rota(inclinaison, player.x, player.y)
             case 2:
                 grenade.rotate(-inclinaison * 360 / (2 * pi))
-                grenade.move_with_rota(inclinaison)
+                grenade.move_with_rota(inclinaison, player.x, player.y)
             case 3:
                 grenade_frag.rotate(-inclinaison * 360 / (2 * pi))
-                grenade_frag.move_with_rota(inclinaison)
+                grenade_frag.move_with_rota(inclinaison, player.x, player.y)
         fleche.rotate(-inclinaison * 360 / (2 * pi))
-        fleche.move_with_rota(inclinaison)
+        fleche.move_with_rota(inclinaison, player.x, player.y)
 
     map.void_destruction_stack()
 
@@ -241,6 +266,9 @@ while run:
         player.jump_worm(tick, map.map)
     player.draw(SCREEN)
     #----------------------------------------------
+
+
+
     
     pygame.display.flip()
     Oclock.tick(FRAMERATE)
