@@ -22,10 +22,13 @@ MIN_SIMULTANITY_THRESHOLD = 8       # Nombre minimum de cache pour démarer le p
 G = 0.075                           # G : la constante de gravité
 FRAMERATE = 60                      # Le framerate à atteindre (capé)
 MILITICK = 50                       # Subdivision du tick pour décomposer le mouvement.
-NB_PX_LEFT_RIGHT = 10               # Nb de pixel parcourue à droite et à gauche du pixel d'impact, donne une précision
+NB_PX_LEFT_RIGHT = 1               # Nb de pixel parcourue à droite et à gauche du pixel d'impact, donne une précision
                                     # Sur la normale de l'impact
 SENS_DIRECT = ((-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1))
                                     # Défini le sens direct (selon l'orientation pygame de l'axe y)
 SENS_INDIRECT = SENS_DIRECT[::-1]   # Défini le sens indirect (selon l'orientation pygame de l'axe y)
 REMOTE_POINT = 10                   # Défini le nombre de point qu'il remonter à l'arrière
-MIN_SPEED_REBOND = pi               # Défini la speed minimum pour rebondir
+MIN_SPEED_BOUNCE = pi               # Défini la speed minimum pour rebondir
+BOUNCING = 0.2
+FALL_LIMIT = 20
+AUTO_MOUNT = 3

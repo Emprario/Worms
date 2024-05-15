@@ -35,3 +35,6 @@ class Entity(pygame.sprite.Sprite):
 
     def get_speed(self, t, v0, alpha):
         return G * t + v0 * sin(alpha), v0 * cos(alpha)
+
+    def __repr__(self) -> str:
+        return f"Entity({self.x}, {self.y})"

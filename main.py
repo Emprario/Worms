@@ -45,7 +45,7 @@ map = TileMap(path)
 def_map(map)
 
 flags = pygame.FULLSCREEN | pygame.HWSURFACE
-SCREEN = pygame.display.set_mode(map.dimensions, flags)
+SCREEN = pygame.display.set_mode(map.dimensions)#, flags)
 
 pygame.display.set_caption("PalaVect2")
 
@@ -64,7 +64,8 @@ inclinaison = 0.0
 power = 0.1
 get_axis = 0
 
-player = Worm(0,680,358)
+# player = Worm(0,680,358)
+player = Worm(0, 710, 0)
 
 bazooka = Bazooka((map.dimensions[0] // 2)-25, (map.dimensions[1] // 2)-25, "assets/textures/Bazooka2.png", 0,-40,  50)
 bazooka.move_with_rota(inclinaison, player.x, player.y)
@@ -248,7 +249,6 @@ while run:
                 grenade_frag.move_with_rota(inclinaison, player.x, player.y)
         fleche.rotate(-inclinaison * 360 / (2 * pi))
         fleche.move_with_rota(inclinaison, player.x, player.y)
-
 
     map.void_destruction_stack()
 
