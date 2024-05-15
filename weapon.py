@@ -5,6 +5,7 @@ from math import pi
 from math import sin
 from math import cos
 from utils import get_circle
+from physics import addtomove
 
 
 class Fleche(Entity):
@@ -153,8 +154,6 @@ class Pro_grenade(Projectile):
         self.map_destroy_stack.append((pos, 60))
         # self.map_destroy_stack.extend([(circle[i], 20.0) for i in range(len(circle))])
         self.kill()
-
-
 
 
 class Pro_frag_grenade(Projectile):

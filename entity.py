@@ -13,12 +13,15 @@ from CONSTS import G
 
 class Entity(pygame.sprite.Sprite):
 
-    def __init__(self, x: int, y: int):  # , map: list[list[bool]]):
+    def __init__(self, x: int, y: int, offset_x: int = 0, offset_y: int = 0):  # , map: list[list[bool]]):
         super().__init__()
         self.rx: float = x
         self.ry: float = y
         self.x: int = x
         self.y: int = y
+        self.offset_x: int = offset_x
+        self.offset_y: int = offset_y
+
         # if map[self.x][self.y]:
         #    raise AssertionError("The worms is not supposed to be in a wall")
 
@@ -26,7 +29,7 @@ class Entity(pygame.sprite.Sprite):
         self.x, self.y = int(round(self.rx)), int(round(self.ry))
 
     def synchroniseXY(self):
-        self.rx,self.ry = self.x, self.y
+        self.rx, self.ry = self.x, self.y
 
     def move_to(self, t, v0, alpha, mod):
         self.ry += mod * (G * t + v0 * sin(alpha))

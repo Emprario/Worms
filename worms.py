@@ -17,7 +17,7 @@ class Worm(Entity):
         Constructeur de Worm
         :param camp: Camp du worm (pas nécessairement binaire)
         """
-        super().__init__(x, y)
+        super().__init__(x, y, 62, 60)
         self.team = camp  # L'équipe du worm
         self.health = hp
         self.alive = True  # Checker si le worm est en vie
@@ -27,9 +27,13 @@ class Worm(Entity):
         self.jump_height = 80  # La hauteur maximale d'un saut
         self.movement_distance = 200  # NOT THE FINAL VALUE SUBJECT TO CHANGE
         self.movement_speed = 40  # SUBJECT TO CHANGE
-        self.image = pygame.image.load("assets/worm/worm_sprite.png").convert_alpha()
+
         self.face = 0  # face = 1 regard à droite    face = 0 regard à gauche
         self.ChangeFace = False  # Track if the direction of the worms is changed by the movement this frame
+        self.image = pygame.image.load("assets/worm/sprite.png").convert_alpha()
+        scale: float = 0.08
+        self.image = pygame.transform.scale(self.image, (int(self.image.get_width() * scale), int(self.image.get_height() * scale)))
+
 
     def drop_worm(self, map, movelst):
         """
@@ -37,6 +41,7 @@ class Worm(Entity):
         """
         # movelst.append([40, -10, map, (self.x, self.y), self, True, 0])
 
+        
     def move_worm(self, x_axis, y_axis, map):
         """
         Permet de déplacer le worm dans les deux directions
@@ -63,6 +68,7 @@ class Worm(Entity):
 
                 # --------------
                 if abs(self.y - i) > FALL_LIMIT:
+
                     # def translation(v_init: float, alpha: float, map: list[list[bool]], point0: coordinate, entity: Entity,
                     #             force: bool, local_tick: int) -> tuple[bool, bool, None | float]:
                     #
@@ -72,11 +78,9 @@ class Worm(Entity):
                 # -------------
                 else:
                     self.__abs_movement(map, x_axis, y_axis)
-
             # mvt lattéral
             else:
                 self.__abs_movement(map, x_axis, y_axis)
-
 
 
     def __abs_movement(self, map, x_axis, y_axis):
@@ -99,6 +103,7 @@ class Worm(Entity):
             print("Goes down by", y_dp - self.y)
             self.y += y_dp - self.y
 
+            
     def jump_worm(self, tick, map):
         """
         Fait sauter le worm
@@ -112,7 +117,6 @@ class Worm(Entity):
             self.is_on_ground = False
 
     def draw(self, screen):
-
         font = pygame.font.Font(None, 24)
         HP_surface = font.render(str(self.health), True, (0, 0, 0))
         screen.blit(HP_surface, (self.x, self.y - 70))
@@ -122,10 +126,12 @@ class Worm(Entity):
             self.ChangeFace = False
         screen.blit(self.image, (self.x - 62, self.y - 80))
 
+
     def pg_blit(self, surface: pygame.Surface):
         """Pygame Blit : Fonction d'affichage spécifique au worm"""
         pass
 
+      
     def fall_damage(self, *args):
         if args[-1] > 3:
             self.health -= round(2 * args[-1])
