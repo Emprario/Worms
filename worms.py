@@ -32,8 +32,8 @@ class Worm(Entity):
         self.ChangeFace = False  # Track if the direction of the worms is changed by the movement this frame
         self.image = pygame.image.load("assets/worm/sprite.png").convert_alpha()
         scale: float = 0.08
-        self.image = pygame.transform.scale(self.image, (int(self.image.get_width() * scale), int(self.image.get_height() * scale)))
-
+        self.image = pygame.transform.scale(self.image,
+                                            (int(self.image.get_width() * scale), int(self.image.get_height() * scale)))
 
     def drop_worm(self, map, movelst):
         """
@@ -41,7 +41,6 @@ class Worm(Entity):
         """
         # movelst.append([40, -10, map, (self.x, self.y), self, True, 0])
 
-        
     def move_worm(self, x_axis, y_axis, map):
         """
         Permet de déplacer le worm dans les deux directions
@@ -82,7 +81,6 @@ class Worm(Entity):
             else:
                 self.__abs_movement(map, x_axis, y_axis)
 
-
     def __abs_movement(self, map, x_axis, y_axis):
         """ pour le deplacement sur les surface inclinés: prendre la colone
         pixel à droite ou gauche (selon le input), parcourir cet colone pour trouver
@@ -92,7 +90,7 @@ class Worm(Entity):
         for i in range(1, len(map[0])):
             if map[self.x][i] and not map[self.x][i - 1] and abs(i - self.y) < abs(y_dp - self.y):
                 y_dp = i
-        print("raw y_dp - self.y:", y_dp - self.y)
+        #print("raw y_dp - self.y:", y_dp - self.y)
         if y_dp - self.y < 0:
             if y_dp - self.y < AUTO_MOUNT:
                 print("Goes up by", self.y - y_dp)
@@ -103,7 +101,6 @@ class Worm(Entity):
             print("Goes down by", y_dp - self.y)
             self.y += y_dp - self.y
 
-            
     def jump_worm(self, tick, map):
         """
         Fait sauter le worm
@@ -118,20 +115,14 @@ class Worm(Entity):
 
     def draw(self, screen):
         font = pygame.font.Font(None, 24)
-        HP_surface = font.render(str(self.health), True, (0, 0, 0))
-        screen.blit(HP_surface, (self.x, self.y - 70))
+        hp_surface = font.render(str(self.health), True, (0, 0, 0))
+        screen.blit(hp_surface, (self.x, self.y - 70))
 
         if self.ChangeFace:
             self.image = pygame.transform.flip(self.image, True, False)
             self.ChangeFace = False
         screen.blit(self.image, (self.x - 62, self.y - 80))
 
-
-    def pg_blit(self, surface: pygame.Surface):
-        """Pygame Blit : Fonction d'affichage spécifique au worm"""
-        pass
-
-      
     def fall_damage(self, *args):
         if args[-1] > 3:
             self.health -= round(2 * args[-1])
