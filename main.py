@@ -20,22 +20,27 @@ import pygame
 from entity import Entity
 from map import TileMap
 from debug_utils import get_time_incache
-from menu import Button, Menu
-from CONSTS import FRAMERATE, MENU_SIZE
+from menu import Button, Menu, Text
+from CONSTS import FRAMERATE, WINDOW_SIZE, GAME_NAME
 from physics import all_moves, translation
+from utils import get_circle
 from worms import Worm
 
 
 class Game:
     def __init__(self):
         pygame.init()
-        pygame.display.set_caption("PalaVect2")
-        self.path = "assets/map/01.map"
-        self.map = TileMap(self.path)
+        pygame.display.set_caption(GAME_NAME)
 
         # flags = pygame.FULLSCREEN | pygame.HWSURFACE
-        self.SCREEN = pygame.display.set_mode(self.map.dimensions)  # , flags)
-        self.ACTIVE_MENU: Menu = Menu("Loading", MENU_SIZE[0], MENU_SIZE[1], pygame.image.load("assets/menu/backgrounds/loading.png").convert_alpha(), [])
+        self.SCREEN = pygame.display.set_mode((WINDOW_SIZE[0], WINDOW_SIZE[1]))  # , flags)
+        self.active_menu: Menu = Menu("Loading", WINDOW_SIZE[0], WINDOW_SIZE[1],
+                                      pygame.image.load("assets/menu/backgrounds/loading.png").convert_alpha())
+        self.active_menu.draw(self.SCREEN)
+        pygame.display.flip()
+
+        self.path = "assets/map/01.map"
+        self.map = TileMap(self.path)
 
         self.Oclock = pygame.time.Clock()
         self.tick = 0
@@ -53,9 +58,13 @@ class Game:
 
         self.MAIN_MENU = None
         self.PAUSE_MENU = None
-        self.create_menus()
+        self.END_MENU = None
+        self.load_menus()
 
-    def create_menus(self):
+    def load_menus(self):
+        title_font = pygame.font.SysFont("Showcard Gothic", 120, False, False)
+        small_title_font = pygame.font.SysFont("Showcard Gothic", 80, False, False)
+
         resume_button = Button(self.SCREEN.get_width() // 2 - 105, self.SCREEN.get_height() // 2 - 44 - 100,
                                pygame.image.load("assets/menu/buttons/resume.png").convert_alpha(), 1, self.exit_menu)
         options_button = Button(self.SCREEN.get_width() // 2 - 105, self.SCREEN.get_height() // 2 - 44,
@@ -64,23 +73,29 @@ class Game:
                              pygame.image.load("assets/menu/buttons/quit.png").convert_alpha(), 1, self.exit_game)
         play_button = Button(self.SCREEN.get_width() // 2 - 210, self.SCREEN.get_height() // 2 - 44 + 200,
                              pygame.image.load("assets/menu/buttons/play.png").convert_alpha(), 2, self.exit_menu)
+        pause_text = Text(self.SCREEN.get_width() // 2 - 125, self.SCREEN.get_height() // 2 - 250, "Pause",
+                          small_title_font, True)
+        title_text = Text(self.SCREEN.get_width() // 2 - 300, self.SCREEN.get_height() // 2 - 350, GAME_NAME,
+                          title_font, True)
 
-        self.PAUSE_MENU = Menu("Pause", MENU_SIZE[0], MENU_SIZE[1],
+        self.PAUSE_MENU = Menu("Pause", WINDOW_SIZE[0], WINDOW_SIZE[1],
                                pygame.image.load("assets/menu/backgrounds/pause.png").convert_alpha(),
-                               [resume_button, options_button, quit_button])
-        self.MAIN_MENU = Menu("Main", MENU_SIZE[0], MENU_SIZE[1],
+                               [resume_button, options_button, quit_button], [pause_text])
+        self.MAIN_MENU = Menu("Main", WINDOW_SIZE[0], WINDOW_SIZE[1],
                               pygame.image.load("assets/menu/backgrounds/main.png").convert_alpha(),
-                              [play_button, options_button, quit_button])
+                              [play_button, options_button, quit_button], [title_text])
+        self.END_MENU = Menu("Fin", WINDOW_SIZE[0], WINDOW_SIZE[1],
+                             pygame.image.load("assets/menu/backgrounds/end.png").convert_alpha(), [], [])
 
     def exit_game(self):
         self.running = False
 
     def set_active_menu(self, menu: Menu):
-        self.ACTIVE_MENU = menu
-        self.ACTIVE_MENU.draw(self.SCREEN)
+        self.active_menu = menu
+        self.active_menu.draw(self.SCREEN)
 
     def exit_menu(self):
-        self.ACTIVE_MENU = None
+        self.active_menu = None
 
     def next_player(self):
         self.current_player += 1
@@ -94,10 +109,10 @@ class Game:
 
         # ----------------- Boucle principale -------------------
         while self.running:
-            if self.ACTIVE_MENU is not None:
+            if self.active_menu is not None:
                 for event in pygame.event.get():
                     if event.type == pygame.MOUSEBUTTONDOWN:
-                        self.ACTIVE_MENU.on_click(pygame.mouse.get_pos())
+                        self.active_menu.on_click(pygame.mouse.get_pos())
                     # elif event.type == pygame.KEYDOWN:
                     #     if event.key == pygame.K_ESCAPE or event.key == pygame.K_p:
                     #         self.exit_menu()
@@ -121,6 +136,13 @@ class Game:
                         # elif event.key == pygame.K_f:
                         #    self.map = TileMap(self.path)
                         #    self.map.blit_texture(all_pxs=True)
+                    elif event.type == pygame.MOUSEBUTTONDOWN:
+                        print("Mouse point @", pygame.mouse.get_pos())
+                        circle = get_circle(5, pos := pygame.mouse.get_pos(), radius := 40)
+                        self.map.destruction_stack.append((pygame.mouse.get_pos(), 40.0))
+                        self.map.destruction_stack.extend([(circle[i], 20.0) for i in range(len(circle))])
+                    elif event.type == pygame.QUIT:
+                        self.exit_game()
 
                 # ------------- Affichage des Entités --------------------
                 for sprite in self.all_sprites:
