@@ -4,7 +4,7 @@ Méthode de gestion de map : tilemap
     - Comment la charger depuis un fichier externe (assets/map/??.map)
     - Comment représenter dans le programme de la matière
 """
-
+import sys
 from functools import reduce
 from sys import setrecursionlimit
 from threading import Thread
@@ -18,7 +18,7 @@ from utils import get_full_line, get_circle
 # from time import time
 
 # Increase by a lot the recursion limit to make algo_peinture working
-setrecursionlimit(9000000)
+setrecursionlimit(2147483645)
 
 def get_point_from_idx(idx: int, SIZE) -> tuple[int, int]:
     return (idx // 4) % SIZE[0], (idx // 4) // SIZE[0]

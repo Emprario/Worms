@@ -12,7 +12,7 @@ from entity import Entity
 from utils import get_full_line
 from map import TileMap
 
-all_moves: list[list[float | float | Entity | bool | int | list[coordinate] | Callable]] = list()
+all_moves: list[list[float | float | Entity | bool | int | list[coordinate] | Callable | Callable]] = list()
 map: TileMap | None = None
 
 
@@ -21,9 +21,11 @@ def def_map(map_local: TileMap) -> None:
     map = map_local
 
 
-def addtomove(v_init: float, alpha: float, entity: Entity, callback: Callable):
+def addtomove(v_init: float, alpha: float, entity: Entity, callback: Callable, failCallback: Callable):
     entity.synchroniseXY()
-    all_moves.append([v_init, alpha, entity, True, 0, [(entity.x, entity.y)], callback])
+    if map[entity.x, entity.y]:
+        raise AssertionError(f"{entity} already in the wall")
+    all_moves.append([v_init, alpha, entity, True, 0, [(entity.x, entity.y)], callback, failCallback])
 
 
 def translation(v_init: float, alpha: float, entity: Entity, force: bool, local_tick: int, trace: list[coordinate]
@@ -41,16 +43,15 @@ def translation(v_init: float, alpha: float, entity: Entity, force: bool, local_
     #               [map[entity.x + X][entity.y + Y] for X in range(-1, 2) for Y in range(-1, 2)]
     #               )
     # if force or not prox:
-    """if map[entity.x, entity.y]:
+    if map[entity.x, entity.y]:
         print(entity)
-        raise AssertionError("Worm already in the wall")"""
+        raise AssertionError("Entity already in the wall")
 
     for militick in range(0, MILITICK):
         temp = (entity.x, entity.y)
         entity.move_to(local_tick, v_init, alpha, 1 / MILITICK)
-        if entity.x <= 0 or entity.y <= 0 or entity.x >= map.dimensions[0] or entity.y >= map.dimensions[1]:
-            return None
-        elif map[entity.x, entity.y]:
+
+        if map[entity.x, entity.y]:
             force = False
 
             lst = get_full_line(temp, (entity.x, entity.y))
@@ -97,30 +98,31 @@ def move_entities():
     i = 0
     while i < len(all_moves):
         # print(tick, [move[3] for move in all_moves])
-        result = translation(*all_moves[i][:-1])
-        if result is None:
-            print("Outside")
+        try:
+            result = translation(*all_moves[i][:-2])
+        except ValueError:
+            print("I: Out of map")
+            all_moves[i][-1](*all_moves[i][:-2])
             del all_moves[i]
+            continue
+        # print(result)
+        all_moves[i][-5] = result[1]
+        all_moves[i][-4] += 1
+        if result[0] and result[2] < MIN_SPEED_BOUNCE:
+            print("I: Killed")
+            all_moves[i][-2](*all_moves[i][:-2], result[2])
+            del all_moves[i]
+        elif result[0] and result[2] > MIN_SPEED_BOUNCE:
+            entity = all_moves[i][2]
+            next_point = result[-1]
+            callback = all_moves[i][-2]
+            failCallback = all_moves[i][-1]
+            v_impact = result[2]
+            trace = all_moves[i][-3].copy()
+            del all_moves[i]
+            bounce(entity, next_point, callback, failCallback, v_impact, trace)
         else:
-            # print(result)
-            all_moves[i][-4] = result[1]
-            all_moves[i][-3] += 1
-            if result[0] and result[2] < MIN_SPEED_BOUNCE:
-                print("I: Killed")
-                all_moves[i][-1](*all_moves[i][:-1], result[2])
-                del all_moves[i]
-            elif result[0] and result[2] > MIN_SPEED_BOUNCE:
-                entity = all_moves[i][2]
-                next_point = result[-1]
-                callback = all_moves[i][-1]
-                v_impact = result[2]
-                trace = all_moves[i][-2].copy()
-                del all_moves[i]
-                bounce(entity, next_point, callback, v_impact, trace)
-            # elif result[0] and result[2] > MIN_SPEED_REBOND:
-            #     rebondir(*all_moves[i], result[-1]);
-            else:
-                i += 1
+            i += 1
 
 
 def get_right_left_px(px: coordinate, _from: coordinate) -> tuple[coordinate, coordinate]:
@@ -213,7 +215,7 @@ def get_remote_point_from_curve(full_line: list[coordinate]) -> coordinate:
 
 # v_init: float, alpha: float, entity: Entity, force: bool, local_tick: int, trace: list[coordinate]
 # list[float | float | Entity | bool | int | list[coordinate] | Callable | coordinate]
-def bounce(entity: Entity, next_point: coordinate, callback: Callable, v_impact, trace) -> None:
+def bounce(entity: Entity, next_point: coordinate, callback: Callable, failCallback: Callable, v_impact, trace) -> None:
     """
     Rebond un point et ajout avec addtomove
     :dparam args: Arguments conventionnel de la gravité
@@ -228,4 +230,4 @@ def bounce(entity: Entity, next_point: coordinate, callback: Callable, v_impact,
     surf_angle = get_angle(impact_pt, butter_l_pix)
     trajectory_angle = get_angle(get_remote_point_from_curve(trace), butter_l_pix)
     impact_angle = trajectory_angle + surf_angle
-    addtomove(BOUNCING * v_impact, -impact_angle, entity, callback)  #
+    addtomove(BOUNCING * v_impact, -impact_angle, entity, callback, failCallback)
