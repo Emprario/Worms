@@ -29,6 +29,7 @@ class Entity(pygame.sprite.Sprite):
         self.offset_x: int = offset_x
         self.offset_y: int = offset_y
         self.game.all_sprites.add(self)
+        self.can_bounce: bool = True
         # if map[self.x][self.y]:
         #    raise AssertionError("The worms is not supposed to be in a wall")
 

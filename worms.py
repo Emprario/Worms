@@ -8,7 +8,7 @@ from math import pi
 
 import pygame
 
-from CONSTS import FALL_LIMIT, AUTO_MOUNT
+from CONSTS import FALL_LIMIT, AUTO_MOUNT, MIN_SPEED_DAMAGE
 from entity import Entity
 from physics import addtomove
 
@@ -88,8 +88,12 @@ class Worm(Entity):
         pixel à droite ou gauche (selon le input), parcourir cet colone pour trouver
         les points de contour (les pixel True apres un false). Ensuite faire la différence
         de y de ces points avec le y du joueur pour trouver le point de contour le plus proche."""
+        ite: bool = False
+        for p in range(1, AUTO_MOUNT + 1):
+            if not map[self.x][self.y - p] and map[self.x][self.y]:
+                ite = True
 
-        if (not map[self.x][self.y - 6] and map[self.x][self.y]) or not map[self.x][self.y]:
+        if ite or not map[self.x][self.y]:
             y_dp = 0
             for i in range(1, len(map[0])):
                 if map[self.x][i] and not map[self.x][i - 1] and abs(i - self.y) < abs(y_dp - self.y):
@@ -97,12 +101,12 @@ class Worm(Entity):
             # print("raw y_dp - self.y:", y_dp - self.y)
             if y_dp - self.y < 0:
                 if y_dp - self.y < AUTO_MOUNT:
-                    print("Goes up by", self.y - y_dp)
+                    # print("Goes up by", self.y - y_dp)
                     self.y += y_dp - self.y
                 else:
                     self.x -= x_axis
             elif y_dp - self.y > 1:
-                print("Goes down by", y_dp - self.y)
+                # print("Goes down by", y_dp - self.y)
                 self.y += y_dp - self.y
         else:
             self.x -= x_axis
@@ -114,9 +118,9 @@ class Worm(Entity):
         """
         if self.is_on_ground:
             if self.face == 1:
-                addtomove(2, -pi / 4, self, self.fall_damage, self.kill)
+                addtomove(3, -pi / 3, self, self.fall_damage, self.kill)
             else:
-                addtomove(2, -3 * pi / 4, self, self.fall_damage, self.kill)
+                addtomove(3, -2 * pi / 3, self, self.fall_damage, self.kill)
             self.is_on_ground = False
 
     def draw(self, screen):
@@ -144,6 +148,7 @@ class Worm(Entity):
                 break
 
     def fall_damage(self, *args):
-        if args[-1] > 3:
-            self.health -= round(2 * args[-1])
-        self.is_on_ground = True
+        if args[-2] > MIN_SPEED_DAMAGE:
+            self.health -= round(2 * args[-2])
+        if not args[-1]:
+            self.is_on_ground = True

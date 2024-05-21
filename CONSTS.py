@@ -35,5 +35,6 @@ REMOTE_POINT = 10  # Défini le nombre de point qu'il remonter à l'arrière
 MIN_SPEED_BOUNCE = pi  # Défini la speed minimum pour rebondir
 BOUNCING = 0.2
 FALL_LIMIT = 20
-AUTO_MOUNT = 3
+AUTO_MOUNT = 4
 COEF_DIST_DAMAGE = 40
+MIN_SPEED_DAMAGE = 3.5

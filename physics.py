@@ -23,8 +23,6 @@ def def_map(map_local: TileMap) -> None:
 
 def addtomove(v_init: float, alpha: float, entity: Entity, callback: Callable, failCallback: Callable):
     entity.synchroniseXY()
-    if map[entity.x, entity.y]:
-        raise AssertionError(f"{entity} already in the wall")
     all_moves.append([v_init, alpha, entity, True, 0, [(entity.x, entity.y)], callback, failCallback])
 
 
@@ -43,9 +41,12 @@ def translation(v_init: float, alpha: float, entity: Entity, force: bool, local_
     #               [map[entity.x + X][entity.y + Y] for X in range(-1, 2) for Y in range(-1, 2)]
     #               )
     # if force or not prox:
+    # if map[entity.x, entity.y]:
+        # print(entity)
+        # raise AssertionError("Entity already in the wall")
     if map[entity.x, entity.y]:
-        print(entity)
-        raise AssertionError("Entity already in the wall")
+        entity.y -= 1
+
 
     for militick in range(0, MILITICK):
         temp = (entity.x, entity.y)
@@ -108,11 +109,12 @@ def move_entities():
         # print(result)
         all_moves[i][-5] = result[1]
         all_moves[i][-4] += 1
-        if result[0] and result[2] < MIN_SPEED_BOUNCE:
-            print("I: Killed")
-            all_moves[i][-2](*all_moves[i][:-2], result[2])
+        if result[0] and (result[2] < MIN_SPEED_BOUNCE or not all_moves[i][2].can_bounce):
+            # print("I: Killed")
+            all_moves[i][-2](*all_moves[i][:-2], result[2], False)
             del all_moves[i]
         elif result[0] and result[2] > MIN_SPEED_BOUNCE:
+            all_moves[i][-2](*all_moves[i][:-2], result[2], True)
             entity = all_moves[i][2]
             next_point = result[-1]
             callback = all_moves[i][-2]
