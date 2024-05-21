@@ -11,7 +11,7 @@ import pygame
 from entity import Entity
 from math import sin, cos, pi
 from utils import get_circle
-from CONSTS import coordinate, COEF_DIST_DAMAGE
+from CONSTS import coordinate
 
 
 class Fleche(Entity):
@@ -62,14 +62,14 @@ class ChargeBar(Entity):
 
 
 class Weapon(Entity):
-    def __init__(self, game: Game, x: int, y: int, image: str, rotation: float, angle: float, size: int):
+    def __init__(self, game: Game, x: int, y: int, image: str, angle: float, size: int):
         super().__init__(game, x, y)
         self.original = pygame.image.load(image)
         self.angle = angle
         self.original = pygame.transform.scale(self.original, (size, size))
-        self.image = pygame.transform.rotate(self.original, angle + rotation)
-        self.x_base = self.x
-        self.y_base = self.y
+        self.image = pygame.transform.rotate(self.original, angle)
+        self.x_base = self.x - 15
+        self.y_base = self.y - 50
 
     def move_with_rota(self, angle, x, y):
         self.x_base = x - 15
@@ -85,7 +85,7 @@ class Weapon(Entity):
 
 class Bazooka(Weapon):
     def __init__(self, game: Game, x: int, y: int, angle: float):
-        super().__init__(game, x, y, "assets/textures/Bazooka2.png", 20, angle, 50)
+        super().__init__(game, x, y, "assets/textures/weapons/bazooka.png", angle, 50)
 
     def shoot(self, power, inclinaison):
         pro_bazooka = ProBazooka(self.game, self.x + 25, self.y + 25)
@@ -95,7 +95,7 @@ class Bazooka(Weapon):
 
 class Sniper(Weapon):
     def __init__(self, game: Game, x: int, y: int, angle: float):
-        super().__init__(game, x, y, "assets/textures/Sniper.png", 0, angle, 50)
+        super().__init__(game, x, y, "assets/textures/weapons/sniper.png", angle, 50)
 
     def shoot(self, power, inclinaison):
         pro_sniper = ProSniper(self.game, self.x + 25, self.y + 25)
@@ -104,7 +104,7 @@ class Sniper(Weapon):
 
 class Grenade(Weapon):
     def __init__(self, game: Game, x: int, y: int, angle: float):
-        super().__init__(game, x, y, "assets/textures/Grenade.png", 0, angle, 50)
+        super().__init__(game, x, y, "assets/textures/weapons/grenade.png", angle, 50)
 
     def shoot(self, power, inclinaison):
         pro_grenade = ProGrenade(self.game, self.x + 25, self.y + 25)
@@ -113,7 +113,7 @@ class Grenade(Weapon):
 
 class GrenadeFrag(Weapon):
     def __init__(self, game: Game, x: int, y: int, angle: float):
-        super().__init__(game, x, y, "assets/textures/Grenade_frag.png", 0, angle, 50)
+        super().__init__(game, x, y, "assets/textures/weapons/grenade_frag.png", angle, 50)
 
     def shoot(self, power, inclinaison):
         pro_grenade_frag = ProFragGrenade(self.game, self.x + 25, self.y + 25)
@@ -148,7 +148,7 @@ class Projectile(Entity):
 
 class ProBazooka(Projectile):
     def __init__(self, game: Game, x: int, y: int):
-        super().__init__(game, x, y, "assets/textures/Explosion.png", 12, 25, False, 10)
+        super().__init__(game, x, y, "assets/textures/weapons/explosion.png", 12, 25, False, 10)
 
     def destroy(self, *args):
         if not args[-1]:
@@ -159,7 +159,7 @@ class ProBazooka(Projectile):
 
 class ProSniper(Projectile):
     def __init__(self, game: Game, x: int, y: int):
-        super().__init__(game, x, y, "assets/textures/Explosion.png", 120, 8, False, 10)
+        super().__init__(game, x, y, "assets/textures/weapons/explosion.png", 120, 8, False, 10)
 
     def destroy(self, *args):
         if not args[-1]:
@@ -170,7 +170,7 @@ class ProSniper(Projectile):
 
 class ProGrenade(Projectile):
     def __init__(self, game: Game, x: int, y: int):
-        super().__init__(game, x, y, "assets/textures/Grenade.png", 7, 20, True, 10)
+        super().__init__(game, x, y, "assets/textures/weapons/grenade.png", 7, 20, True, 10)
         self.can_bounce = True
 
     def destroy(self, *args):
@@ -182,7 +182,7 @@ class ProGrenade(Projectile):
 
 class ProFragGrenade(Projectile):
     def __init__(self, game: Game, x: int, y: int):
-        super().__init__(game, x, y, "assets/textures/Grenade_frag.png", 7, 20, True, 10)
+        super().__init__(game, x, y, "assets/textures/weapons/grenade_frag.png", 7, 20, True, 10)
         self.can_bounce = True
 
     def destroy(self, *args):

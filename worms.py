@@ -32,7 +32,7 @@ class Worm(Entity):
 
         self.face = 0  # face = 1 regard à droite    face = 0 regard à gauche
         self.ChangeFace = False  # Track if the direction of the worms is changed by the movement this frame
-        self.image = pygame.image.load("assets/textures/worm.png").convert_alpha()
+        self.image = pygame.image.load("assets/textures/worm/worm.png").convert_alpha()
         scale: float = 0.08
         self.image = pygame.transform.scale(self.image,
                                             (int(self.image.get_width() * scale), int(self.image.get_height() * scale)))
@@ -146,6 +146,8 @@ class Worm(Entity):
             if self.game.players[i] is self:
                 self.game.players.pop(i)
                 break
+        if self.game.current_player == len(self.game.players):
+            self.game.current_player = 0
 
     def fall_damage(self, *args):
         if args[-2] > MIN_SPEED_DAMAGE:

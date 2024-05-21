@@ -7,18 +7,14 @@ Merci de mettre des hints sur les constantes dans le programme afin de faciliter
 from math import pi
 
 
-# Errors
-class OnLoadMapError(Exception):
-    pass
-
-
 # Constantes
 GAME_NAME = "PalaVect2"
 WINDOW_SIZE = (1920, 1080)
 SPAWNABLE_X = [(136, 861), (1135, 1246), (1284, 1777)]
 COLORS = ['red', 'green', 'blue', 'gold', 'gray', 'cyan', 'orange', 'purple', 'black', 'violet', 'yellow', 'white']
-PLAYERS = 2
-coordinate = tuple[int, int]  # Alias pour les coordonées
+PLAYERS = 3
+DEBUG = False
+
 DEFAULT_DENSITY = 20  # Densité pour le traçage de cercle
 MAX_THREAD_BY_CALC = 1  # Depreceated
 SIMULTANITY_THRESHOLD = 64  # Nombre maximum de cache qui est généré
@@ -38,3 +34,11 @@ FALL_LIMIT = 20
 AUTO_MOUNT = 4
 COEF_DIST_DAMAGE = 40
 MIN_SPEED_DAMAGE = 3.5
+
+
+coordinate = tuple[int, int]  # Alias pour les coordonées
+
+
+# Errors
+class OnLoadMapError(Exception):
+    pass
