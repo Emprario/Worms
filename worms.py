@@ -11,7 +11,6 @@ import pygame
 from CONSTS import FALL_LIMIT, AUTO_MOUNT
 from entity import Entity
 from physics import addtomove
-from weapon import ProBazooka, Bazooka, ProSniper, ProGrenade, ProFragGrenade, Sniper, Grenade, GrenadeFrag, Weapon
 
 """Il faut changer l'apel de moveworms dans main, appel de la fonction à chaque frame"""
 
@@ -19,20 +18,21 @@ from weapon import ProBazooka, Bazooka, ProSniper, ProGrenade, ProFragGrenade, S
 class Worm(Entity):
     """Classe du ver de terre"""
 
-    def __init__(self, game: Game, camp: int, x: int, y: int, hp=100):
+    def __init__(self, game: Game, color: int, x: int, y: int, hp: float = 100):
         """
         Constructeur de Worm
         :param camp: Camp du worm (pas nécessairement binaire)
         """
-        super().__init__(game, x, y, 62, 60)
+        super().__init__(game, x, y, 30, 60)
         self.health = hp
+        self.color = color
         self.is_on_ground = True
         # self.inclinaison = 0
         self.current_weapon = -1
 
         self.face = 0  # face = 1 regard à droite    face = 0 regard à gauche
         self.ChangeFace = False  # Track if the direction of the worms is changed by the movement this frame
-        self.image = pygame.image.load("assets/worm/sprite.png").convert_alpha()
+        self.image = pygame.image.load("assets/textures/worm.png").convert_alpha()
         scale: float = 0.08
         self.image = pygame.transform.scale(self.image,
                                             (int(self.image.get_width() * scale), int(self.image.get_height() * scale)))
@@ -107,9 +107,6 @@ class Worm(Entity):
         else:
             self.x -= x_axis
 
-
-
-
     def jump_worm(self, tick, map):
         """
         Fait sauter le worm
@@ -125,13 +122,26 @@ class Worm(Entity):
     def draw(self, screen):
         super().draw(screen)
         font = pygame.font.Font(None, 24)
-        hp_surface = font.render(str(self.health), True, (0, 0, 0))
-        screen.blit(hp_surface, (self.x, self.y - 70))
+        hp_surface = font.render(str(round(self.health, 2)), True, (0, 0, 0))
+        screen.blit(hp_surface, (self.x - 15, self.y - 80))
 
         if self.ChangeFace:
             self.image = pygame.transform.flip(self.image, True, False)
             self.ChangeFace = False
         # screen.blit(self.image, (self.x - 62, self.y - 80))
+        pygame.draw.circle(screen, self.color, (self.x, self.y), radius=5)
+
+    def hit(self, damage: float):
+        self.health -= damage
+        if self.health <= 0:
+            self.kill()
+
+    def kill(self, *args):
+        super().kill(args)
+        for i in range(len(self.game.players)):
+            if self.game.players[i] is self:
+                self.game.players.pop(i)
+                break
 
     def fall_damage(self, *args):
         if args[-1] > 3:

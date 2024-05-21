@@ -11,6 +11,7 @@ import pygame
 from entity import Entity
 from math import sin, cos, pi
 from utils import get_circle
+from CONSTS import coordinate, COEF_DIST_DAMAGE
 
 
 class Fleche(Entity):
@@ -100,6 +101,7 @@ class Sniper(Weapon):
         pro_sniper = ProSniper(self.game, self.x + 25, self.y + 25)
         addtomove(power * pro_sniper.speed, inclinaison, pro_sniper, pro_sniper.destroy, pro_sniper.kill)
 
+
 class Grenade(Weapon):
     def __init__(self, game: Game, x: int, y: int, angle: float):
         super().__init__(game, x, y, "assets/textures/Grenade.png", 0, angle, 50)
@@ -115,56 +117,71 @@ class GrenadeFrag(Weapon):
 
     def shoot(self, power, inclinaison):
         pro_grenade_frag = ProFragGrenade(self.game, self.x + 25, self.y + 25)
-        addtomove(power * pro_grenade_frag.speed, inclinaison, pro_grenade_frag, pro_grenade_frag.destroy, pro_grenade_frag.kill)
+        addtomove(power * pro_grenade_frag.speed, inclinaison, pro_grenade_frag, pro_grenade_frag.destroy,
+                  pro_grenade_frag.kill)
 
 
 class Projectile(Entity):
-    def __init__(self, game: Game, x: int, y: int, image: str, speed: float, taille: int, rebond: bool):
+    def __init__(self, game: Game, x: int, y: int, image: str, speed: float, taille: int, rebond: bool, damage: int):
         super().__init__(game, x, y)
         self.image = pygame.Surface((taille, taille))
         self.speed = speed
         self.rebond = rebond
+        self.damage = damage
         self.original = pygame.image.load(image)
         self.image = pygame.transform.scale(self.original, (taille, taille))
 
     def destroy(self, *args):
         self.kill()
-        pass
+
+    def explosion_damage(self, explosions: list[tuple[coordinate, float, float]]):
+        """
+        :param explosions: Tuple[center, radius]
+        """
+        for center, radius, damage in explosions:
+            for player in self.game.players:
+                dist = ((player.x - center[0]) ** 2 + (player.y - center[1]) ** 2) ** 0.5
+                if dist < radius:
+                    player.hit(damage * (dist / radius))
 
 
 class ProBazooka(Projectile):
     def __init__(self, game: Game, x: int, y: int):
-        super().__init__(game, x, y, "assets/textures/Explosion.png", 12, 25, False)
+        super().__init__(game, x, y, "assets/textures/Explosion.png", 12, 25, False, 10)
 
     def destroy(self, *args):
         self.game.map.destruction_stack.append(((self.x, self.y), 50))
+        self.explosion_damage([((self.x, self.y), 50, self.damage)])
         super().destroy()
 
 
 class ProSniper(Projectile):
     def __init__(self, game: Game, x: int, y: int):
-        super().__init__(game, x, y, "assets/textures/Explosion.png", 120, 8, False)
+        super().__init__(game, x, y, "assets/textures/Explosion.png", 120, 8, False, 10)
 
     def destroy(self, *args):
         self.game.map.destruction_stack.append(((self.x, self.y), 10))
+        self.explosion_damage([((self.x, self.y), 10, self.damage)])
         super().destroy()
 
 
 class ProGrenade(Projectile):
     def __init__(self, game: Game, x: int, y: int):
-        super().__init__(game, x, y, "assets/textures/Grenade.png", 7, 20, True)
+        super().__init__(game, x, y, "assets/textures/Grenade.png", 7, 20, True, 10)
 
     def destroy(self, *args):
         self.game.map.destruction_stack.append(((self.x, self.y), 60))
+        self.explosion_damage([((self.x, self.y), 60, self.damage)])
         super().destroy()
 
 
 class ProFragGrenade(Projectile):
     def __init__(self, game: Game, x: int, y: int):
-        super().__init__(game, x, y, "assets/textures/Grenade_frag.png", 7, 20, True)
+        super().__init__(game, x, y, "assets/textures/Grenade_frag.png", 7, 20, True, 10)
 
     def destroy(self, *args):
         circle = get_circle(5, pos := (self.x, self.y), radius := 50)
         self.game.map.destruction_stack.append((pos, 50))
         self.game.map.destruction_stack.extend([(circle[i], 30.0) for i in range(len(circle))])
+        self.explosion_damage([(circle[i], 30.0, self.damage) for i in range(len(circle))] + [(pos, 50, self.damage)])
         super().destroy()

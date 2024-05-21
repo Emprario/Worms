@@ -195,7 +195,7 @@ class TileMap:
         # print(vectmap)
 
         ### INTERLUDE ###
-        self.reset_ONMAP_thread = Thread(group=None, target=self.__reset_ONMAP, name=None)
+        self.reset_ONMAP_thread = Thread(group=None, target=self.reset_ONMAP, name=None)
         self.reset_ONMAP_thread.start()
 
         self.Surf = pygame.Surface((self.dimensions[0], self.dimensions[1]))
@@ -470,7 +470,7 @@ class TileMap:
 
         self.clear_ONMAPs.append(AX)
         if not self.reset_ONMAP_thread.is_alive():
-            self.reset_ONMAP_thread = Thread(group=None, target=self.__reset_ONMAP, name=None)
+            self.reset_ONMAP_thread = Thread(group=None, target=self.reset_ONMAP, name=None)
             self.reset_ONMAP_thread.start()
 
         # self.tt = 0
@@ -524,7 +524,7 @@ class TileMap:
         # t2 = time()
         # self.tt += t2 - t1
 
-    def __reset_ONMAP(self):
+    def reset_ONMAP(self):
         while len(self.clear_ONMAPs) > 0:
             AX = self.clear_ONMAPs.pop()
             # self.ONMAPs[AX] = deepcopy(self.TRUEMAP)

@@ -21,10 +21,10 @@ from entity import Entity
 from map import TileMap
 from debug_utils import get_time_incache
 from menu import Button, Menu, Text
-from CONSTS import FRAMERATE, WINDOW_SIZE, GAME_NAME
-from physics import move_entities, addtomove, def_map
-from weapon import ProBazooka, Bazooka, ProSniper, ProGrenade, ProFragGrenade, ChargeBar, Sniper, Grenade, GrenadeFrag, \
-    Fleche, Weapon
+from CONSTS import FRAMERATE, WINDOW_SIZE, GAME_NAME, PLAYERS, SPAWNABLE_X, COLORS
+from physics import move_entities, def_map
+from weapon import Bazooka, Sniper, Grenade, GrenadeFrag, Fleche, ChargeBar
+from random import randint, choice
 from math import pi
 from utils import get_circle
 from worms import Worm
@@ -54,8 +54,8 @@ class Game:
 
         self.all_sprites: set[Entity] = set()
 
-        self.current_player = 0
-        self.players: list[Worm] = [Worm(self, 0, 680, 358), Worm(self, 1, 1300, 358)]
+        self.current_player = None
+        self.players: list[Worm] = []
 
         self.running = False
         self.pause = False
@@ -71,6 +71,14 @@ class Game:
         self.PAUSE_MENU = None
         self.END_MENU = None
         self.load_menus()
+        self.generate_players()
+
+    def generate_players(self):
+        for i in range(PLAYERS):
+            sp = choice(SPAWNABLE_X)
+            x = randint(sp[0], sp[1])
+            self.players.append(Worm(self, COLORS[i % 12], x, 0))
+        self.current_player = 0
 
     def load_menus(self):
         title_font = pygame.font.SysFont("Showcard Gothic", 120, False, False)
@@ -132,8 +140,7 @@ class Game:
                                       -self.inclinaison)
             case 3:
                 self.weapon = GrenadeFrag(self, self.get_current_player().x, self.get_current_player().y,
-                                      -self.inclinaison)
-
+                                          -self.inclinaison)
 
     def run(self):
         self.running = True
@@ -179,7 +186,7 @@ class Game:
                             else:
                                 get_axis = 1
                         elif event.key == pygame.K_SPACE:
-                            if self.current_weapon == 1 and not self.map[self.weapon.x+25, self.weapon.y+25]:
+                            if self.current_weapon == 1 and not self.map[self.weapon.x + 25, self.weapon.y + 25]:
                                 self.weapon.shoot(power, self.inclinaison)
                             if self.current_weapon == 0 or self.current_weapon == 2 or self.current_weapon == 3:
                                 power = -self.tick * 0.015
@@ -191,7 +198,8 @@ class Game:
                             power += self.tick * 0.015 + 0.2
                             if power > 1:
                                 power = 1
-                            if self.current_weapon in (0, 2, 3) and not self.map[self.weapon.x+25, self.weapon.y+25]:
+                            if self.current_weapon in (0, 2, 3) and not self.map[
+                                self.weapon.x + 25, self.weapon.y + 25]:
                                 self.weapon.shoot(power, self.inclinaison)
                             power = 0.2
                             print("missile launched")
@@ -202,11 +210,11 @@ class Game:
                                 get_axis = 0
                             else:
                                 get_axis = 0
-                    # elif event.type == pygame.MOUSEBUTTONDOWN:
-                    #     print("Mouse point @", pygame.mouse.get_pos())
-                    #     circle = get_circle(5, pos := pygame.mouse.get_pos(), radius := 40)
-                    #     self.map.destruction_stack.append((pygame.mouse.get_pos(), 40.0))
-                    #     self.map.destruction_stack.extend([(circle[i], 20.0) for i in range(len(circle))])
+                    elif event.type == pygame.MOUSEBUTTONDOWN:
+                        print("Mouse point @", pygame.mouse.get_pos())
+                        circle = get_circle(5, pos := pygame.mouse.get_pos(), radius := 40)
+                        self.map.destruction_stack.append((pygame.mouse.get_pos(), 40.0))
+                        self.map.destruction_stack.extend([(circle[i], 20.0) for i in range(len(circle))])
                     elif event.type == pygame.QUIT:
                         self.exit_game()
 
@@ -227,10 +235,10 @@ class Game:
                     else:
                         self.inclinaison -= 0.015
 
-                #self.weapon.rotate(-self.inclinaison * 360 / (2 * pi))
+                # self.weapon.rotate(-self.inclinaison * 360 / (2 * pi))
                 self.weapon.move_with_rota(self.inclinaison, self.get_current_player().x, self.get_current_player().y)
 
-                #self.fleche.rotate(-self.inclinaison * 360 / (2 * pi))
+                # self.fleche.rotate(-self.inclinaison * 360 / (2 * pi))
                 self.fleche.move_with_rota(self.inclinaison, self.get_current_player().x, self.get_current_player().y)
                 self.charg_bar.moove_bar(self.get_current_player().x, self.get_current_player().y)
 
@@ -242,6 +250,11 @@ class Game:
 
                 move_entities()
 
+                # ---------------------- Fin du jeu ----------------------
+                if not self.players:
+                    self.set_active_menu(self.END_MENU)
+                    continue
+
                 # ------------- Mouvement des joueurs --------------------
                 x_movement = 0
                 keys = pygame.key.get_pressed()
@@ -249,7 +262,7 @@ class Game:
                     x_movement = -2
                 if keys[pygame.K_d]:
                     x_movement = 2
-                self.players[self.current_player].move_worm(x_movement, 0, self.map.map)
+                self.get_current_player().move_worm(x_movement, 0, self.map.map)
                 if keys[pygame.K_z]:
                     self.players[self.current_player].jump_worm(self.tick, self.map.map)
                 for i in range(len(self.players)):
