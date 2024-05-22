@@ -12,7 +12,7 @@ GAME_NAME = "PalaVect2"
 WINDOW_SIZE = (1920, 1080)
 SPAWNABLE_X = [(136, 861), (1135, 1246), (1284, 1777)]
 COLORS = ['red', 'green', 'blue', 'gold', 'gray', 'cyan', 'orange', 'purple', 'black', 'violet', 'yellow', 'white']
-PLAYERS = 3
+PLAYERS = 4
 DEBUG = False
 
 DEFAULT_DENSITY = 20  # Densité pour le traçage de cercle
@@ -28,8 +28,8 @@ SENS_DIRECT = ((-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, 
 # Défini le sens direct (selon l'orientation pygame de l'axe y)
 SENS_INDIRECT = SENS_DIRECT[::-1]  # Défini le sens indirect (selon l'orientation pygame de l'axe y)
 REMOTE_POINT = 10  # Défini le nombre de point qu'il remonter à l'arrière
-MIN_SPEED_BOUNCE = pi  # Défini la speed minimum pour rebondir
-BOUNCING = 0.2
+MIN_SPEED_BOUNCE = 1  # Défini la speed minimum pour rebondir
+BOUNCING = 0.3
 FALL_LIMIT = 20
 AUTO_MOUNT = 4
 COEF_DIST_DAMAGE = 40

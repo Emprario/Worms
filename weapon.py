@@ -148,7 +148,7 @@ class Projectile(Entity):
 
 class ProBazooka(Projectile):
     def __init__(self, game: Game, x: int, y: int):
-        super().__init__(game, x, y, "assets/textures/weapons/explosion.png", 12, 25, False, 10)
+        super().__init__(game, x, y, "assets/textures/weapons/explosion.png", 12, 25, False, 30)
 
     def destroy(self, *args):
         if not args[-1]:
@@ -159,7 +159,7 @@ class ProBazooka(Projectile):
 
 class ProSniper(Projectile):
     def __init__(self, game: Game, x: int, y: int):
-        super().__init__(game, x, y, "assets/textures/weapons/explosion.png", 120, 8, False, 10)
+        super().__init__(game, x, y, "assets/textures/weapons/explosion.png", 120, 8, False, 60)
 
     def destroy(self, *args):
         if not args[-1]:
@@ -170,7 +170,7 @@ class ProSniper(Projectile):
 
 class ProGrenade(Projectile):
     def __init__(self, game: Game, x: int, y: int):
-        super().__init__(game, x, y, "assets/textures/weapons/grenade.png", 7, 20, True, 10)
+        super().__init__(game, x, y, "assets/textures/weapons/grenade.png", 7, 20, True, 25)
         self.can_bounce = True
 
     def destroy(self, *args):
@@ -182,7 +182,7 @@ class ProGrenade(Projectile):
 
 class ProFragGrenade(Projectile):
     def __init__(self, game: Game, x: int, y: int):
-        super().__init__(game, x, y, "assets/textures/weapons/grenade_frag.png", 7, 20, True, 10)
+        super().__init__(game, x, y, "assets/textures/weapons/grenade_frag.png", 7, 20, True, 15)
         self.can_bounce = True
 
     def destroy(self, *args):
