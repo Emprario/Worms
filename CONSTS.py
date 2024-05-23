@@ -10,9 +10,9 @@ from math import pi
 # Constantes
 GAME_NAME = "PalaVect2"
 WINDOW_SIZE = (1920, 1080)
-SPAWNABLE_X = [(136, 861), (1135, 1246), (1284, 1777)]
+SPAWN_POINTS = [(415, 120), (1779, 397), (1190, 142), (1390, 642), (758, 714), (343, 717)]
 COLORS = ['red', 'green', 'blue', 'gold', 'gray', 'cyan', 'orange', 'purple', 'black', 'violet', 'yellow', 'white']
-PLAYERS = 4
+PLAYERS = 3
 DEBUG = False
 
 DEFAULT_DENSITY = 20  # Densité pour le traçage de cercle
@@ -32,8 +32,9 @@ MIN_SPEED_BOUNCE = 1  # Défini la speed minimum pour rebondir
 BOUNCING = 0.3
 FALL_LIMIT = 20
 AUTO_MOUNT = 4
-COEF_DIST_DAMAGE = 40
+COEF_DIST_DAMAGE = 80
 MIN_SPEED_DAMAGE = 3.5
+JUMP = 3
 
 
 coordinate = tuple[int, int]  # Alias pour les coordonées

@@ -15,9 +15,9 @@ from CONSTS import coordinate
 
 
 class Fleche(Entity):
-    def __init__(self, game: Game, x: int, y: int, image: str, angle: int, size: int):
+    def __init__(self, game: Game, x: int, y: int, angle: int, size: int):
         super().__init__(game, x, y)
-        self.original = pygame.image.load(image)
+        self.original = pygame.image.load("assets/textures/weapons/arrow.png")
         self.x_base = self.x
         self.y_base = self.y
         self.angle = angle
@@ -148,47 +148,47 @@ class Projectile(Entity):
 
 class ProBazooka(Projectile):
     def __init__(self, game: Game, x: int, y: int):
-        super().__init__(game, x, y, "assets/textures/weapons/explosion.png", 12, 25, False, 30)
+        super().__init__(game, x, y, "assets/textures/weapons/explosion.png", 12, 25, False, 45)
 
     def destroy(self, *args):
         if not args[-1]:
-            self.game.map.destruction_stack.append(((self.x, self.y), 50))
-            self.explosion_damage([((self.x, self.y), 50, self.damage)])
+            self.game.map.destruction_stack.append(((self.x, self.y), 80))
+            self.explosion_damage([((self.x, self.y), 80, self.damage)])
             super().destroy()
 
 
 class ProSniper(Projectile):
     def __init__(self, game: Game, x: int, y: int):
-        super().__init__(game, x, y, "assets/textures/weapons/explosion.png", 120, 8, False, 60)
+        super().__init__(game, x, y, "assets/textures/weapons/explosion.png", 120, 8, False, 90)
 
     def destroy(self, *args):
         if not args[-1]:
-            self.game.map.destruction_stack.append(((self.x, self.y), 10))
-            self.explosion_damage([((self.x, self.y), 10, self.damage)])
+            self.game.map.destruction_stack.append(((self.x, self.y), 15))
+            self.explosion_damage([((self.x, self.y), 15, self.damage)])
             super().destroy()
 
 
 class ProGrenade(Projectile):
     def __init__(self, game: Game, x: int, y: int):
-        super().__init__(game, x, y, "assets/textures/weapons/grenade.png", 7, 20, True, 25)
+        super().__init__(game, x, y, "assets/textures/weapons/grenade.png", 7, 20, True, 50)
         self.can_bounce = True
 
     def destroy(self, *args):
         if not args[-1]:
-            self.game.map.destruction_stack.append(((self.x, self.y), 60))
-            self.explosion_damage([((self.x, self.y), 60, self.damage)])
+            self.game.map.destruction_stack.append(((self.x, self.y), 100))
+            self.explosion_damage([((self.x, self.y), 100, self.damage)])
             super().destroy()
 
 
 class ProFragGrenade(Projectile):
     def __init__(self, game: Game, x: int, y: int):
-        super().__init__(game, x, y, "assets/textures/weapons/grenade_frag.png", 7, 20, True, 15)
+        super().__init__(game, x, y, "assets/textures/weapons/grenade_frag.png", 7, 20, True, 20)
         self.can_bounce = True
 
     def destroy(self, *args):
         if not args[-1]:
-            circle = get_circle(5, pos := (self.x, self.y), radius := 50)
-            self.game.map.destruction_stack.append((pos, 50))
-            self.game.map.destruction_stack.extend([(circle[i], 30.0) for i in range(len(circle))])
-            self.explosion_damage([(circle[i], 30.0, self.damage) for i in range(len(circle))] + [(pos, 50, self.damage)])
+            circle = get_circle(5, pos := (self.x, self.y), radius := 80)
+            self.game.map.destruction_stack.append((pos, radius))
+            self.game.map.destruction_stack.extend([(circle[i], 45.0) for i in range(len(circle))])
+            self.explosion_damage([(circle[i], 45.0, self.damage) for i in range(len(circle))] + [(pos, 45, self.damage)])
             super().destroy()

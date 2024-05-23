@@ -21,7 +21,7 @@ from entity import Entity
 from map import TileMap
 from debug_utils import get_time_incache
 from menu import Button, Menu, Text
-from CONSTS import FRAMERATE, WINDOW_SIZE, GAME_NAME, PLAYERS, SPAWNABLE_X, COLORS, DEBUG
+from CONSTS import FRAMERATE, WINDOW_SIZE, GAME_NAME, PLAYERS, SPAWN_POINTS, COLORS, DEBUG
 from physics import move_entities, def_map
 from weapon import Bazooka, Sniper, Grenade, GrenadeFrag, Fleche, ChargeBar
 from random import randint, choice
@@ -61,23 +61,21 @@ class Game:
         self.pause = False
 
         self.charg_bar = ChargeBar(self, (self.map.dimensions[0] // 2) - 30, (self.map.dimensions[1] // 2) - 60)
-        self.fleche = Fleche(self, (self.map.dimensions[0] // 2) - 25, (self.map.dimensions[1] // 2) - 20,
-                             "assets/textures/weapons/arrow.png", 0, 50)
+        self.fleche = Fleche(self, (self.map.dimensions[0] // 2) - 25, (self.map.dimensions[1] // 2) - 20, 0, 50)
         self.current_weapon = -1
         self.weapon = None
         self.inclinaison = 0.0
 
-        self.MAIN_MENU = None
-        self.PAUSE_MENU = None
-        self.END_MENU = None
+        self.MAIN_MENU: Menu = None
+        self.PAUSE_MENU: Menu = None
+        self.END_MENU: Menu = None
         self.load_menus()
         self.generate_players()
 
     def generate_players(self):
         for i in range(PLAYERS):
-            sp = choice(SPAWNABLE_X)
-            x = randint(sp[0], sp[1])
-            self.players.append(Worm(self, COLORS[i % 12], x, 0))
+            x, y = SPAWN_POINTS[i % 6]
+            self.players.append(Worm(self, COLORS[i % 12], x, y))
         self.current_player = 0
 
     def load_menus(self):
@@ -88,7 +86,8 @@ class Game:
                                pygame.image.load("assets/textures/menu/buttons/resume.png").convert_alpha(), 1,
                                self.exit_menu)
         options_button = Button(self.SCREEN.get_width() // 2 - 105, self.SCREEN.get_height() // 2 - 44,
-                                pygame.image.load("assets/textures/menu/buttons/options.png").convert_alpha(), 1, None)
+                                pygame.image.load("assets/textures/menu/buttons/options.png").convert_alpha(), 1,
+                                lambda: print("No Options set"))
         quit_button = Button(self.SCREEN.get_width() // 2 - 105, self.SCREEN.get_height() // 2 - 44 + 100,
                              pygame.image.load("assets/textures/menu/buttons/quit.png").convert_alpha(), 1,
                              self.exit_game)
@@ -99,6 +98,9 @@ class Game:
                           small_title_font, True)
         title_text = Text(self.SCREEN.get_width() // 2 - 300, self.SCREEN.get_height() // 2 - 350, GAME_NAME,
                           title_font, True)
+        quit_button2 = Button(self.SCREEN.get_width() - 350, self.SCREEN.get_height() - 150,
+                              pygame.image.load("assets/textures/menu/buttons/quit.png").convert_alpha(), 0.75,
+                              self.exit_game)
 
         self.PAUSE_MENU = Menu("Pause", WINDOW_SIZE[0], WINDOW_SIZE[1],
                                pygame.image.load("assets/textures/menu/backgrounds/pause.png").convert_alpha(),
@@ -107,7 +109,8 @@ class Game:
                               pygame.image.load("assets/textures/menu/backgrounds/main.png").convert_alpha(),
                               [play_button, options_button, quit_button], [title_text])
         self.END_MENU = Menu("Fin", WINDOW_SIZE[0], WINDOW_SIZE[1],
-                             pygame.image.load("assets/textures/menu/backgrounds/end.png").convert_alpha(), [], [])
+                             pygame.image.load("assets/textures/menu/backgrounds/end.png").convert_alpha(),
+                             [quit_button2], [])
 
     def exit_game(self):
         self.running = False
@@ -174,12 +177,12 @@ class Game:
                             self.set_active_menu(self.PAUSE_MENU)
                         if event.key == pygame.K_e:
                             self.next_weapon()
-                        if event.key == pygame.K_UP or event.key == pygame.K_DOWN:
+                        elif event.key == pygame.K_UP or event.key == pygame.K_DOWN:
                             if event.key == pygame.K_DOWN:
                                 get_axis = -1
                             else:
                                 get_axis = 1
-                        if event.key == pygame.K_SPACE:
+                        elif event.key == pygame.K_SPACE:
                             if self.current_weapon == 1 and not self.map[self.weapon.x + 25, self.weapon.y + 25]:
                                 self.weapon.shoot(power, self.inclinaison)
                                 self.next_player()
@@ -207,7 +210,7 @@ class Game:
                                 self.next_player()
                             power = 0.2
                             self.charg_bar.reset_taille()
-                        if event.key == pygame.K_UP or event.key == pygame.K_DOWN:
+                        elif event.key == pygame.K_UP or event.key == pygame.K_DOWN:
                             if event.key == pygame.K_DOWN:
                                 get_axis = 0
                             else:
@@ -252,7 +255,12 @@ class Game:
 
                 # ---------------------- Fin du jeu ----------------------
                 if len(self.players) <= 1:
+                    font = pygame.font.SysFont("Showcard Gothic", 80, False, False)
+                    self.END_MENU.add_text(
+                        Text(self.SCREEN.get_width() // 2 - 160, self.SCREEN.get_height() - 200, "Victoire !", font,
+                             color=self.get_current_player().color))
                     self.set_active_menu(self.END_MENU)
+                    continue
 
                 # ------------- Mouvement des joueurs --------------------
                 x_movement = 0

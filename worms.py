@@ -8,7 +8,7 @@ from math import pi
 
 import pygame
 
-from CONSTS import FALL_LIMIT, AUTO_MOUNT, MIN_SPEED_DAMAGE
+from CONSTS import FALL_LIMIT, AUTO_MOUNT, MIN_SPEED_DAMAGE, JUMP
 from entity import Entity
 from physics import addtomove
 
@@ -118,21 +118,20 @@ class Worm(Entity):
         """
         if self.is_on_ground:
             if self.face == 1:
-                addtomove(3, -pi / 3, self, self.fall_damage, self.kill)
+                addtomove(JUMP, -pi / 3, self, self.fall_damage, self.kill)
             else:
-                addtomove(3, -2 * pi / 3, self, self.fall_damage, self.kill)
+                addtomove(JUMP, -2 * pi / 3, self, self.fall_damage, self.kill)
             self.is_on_ground = False
 
     def draw(self, screen):
         super().draw(screen)
         font = pygame.font.Font(None, 24)
-        hp_surface = font.render(str(round(self.health, 2)), True, (0, 0, 0))
+        hp_surface = font.render(str(round(self.health)), True, (0, 0, 0))
         screen.blit(hp_surface, (self.x - 15, self.y - 80))
 
         if self.ChangeFace:
             self.image = pygame.transform.flip(self.image, True, False)
             self.ChangeFace = False
-        # screen.blit(self.image, (self.x - 62, self.y - 80))
         pygame.draw.circle(screen, self.color, (self.x, self.y), radius=5)
 
     def hit(self, damage: float):

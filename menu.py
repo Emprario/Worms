@@ -23,18 +23,19 @@ class Button:
 
 
 class Text:
-    def __init__(self, x: int, y: int, text: str, font: pygame.font.Font, shadow=False):
+    def __init__(self, x: int, y: int, text: str, font: pygame.font.Font, shadow=False, color=(255, 255, 255)):
         self.x = x
         self.y = y
         self.text = text
         self.font = font
         self.shadow = shadow
+        self.color = color
 
     def draw(self, screen: Surface):
         if self.shadow:
             shadow_surface = self.font.render(self.text, False, (0, 0, 0))
             screen.blit(shadow_surface, (self.x+5, self.y+5))
-        text_surface = self.font.render(self.text, False, (255, 255, 255))
+        text_surface = self.font.render(self.text, False, self.color)
         screen.blit(text_surface, (self.x, self.y))
 
 
@@ -55,6 +56,12 @@ class Menu:
             button.draw(screen)
         for text in self.texts:
             text.draw(screen)
+
+    def add_button(self, button: Button):
+        self.buttons.append(button)
+
+    def add_text(self, text: Text):
+        self.texts.append(text)
 
     def on_click(self, mouse: tuple[int, int]):
         for button in self.buttons:
