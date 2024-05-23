@@ -4,7 +4,7 @@ Méthode de gestion de map : tilemap
     - Comment la charger depuis un fichier externe (assets/map/??.map)
     - Comment représenter dans le programme de la matière
 """
-
+import sys
 from functools import reduce
 from sys import setrecursionlimit
 from threading import Thread
@@ -18,7 +18,7 @@ from utils import get_full_line, get_circle
 # from time import time
 
 # Increase by a lot the recursion limit to make algo_peinture working
-setrecursionlimit(9000000)
+setrecursionlimit(2147483645)
 
 def get_point_from_idx(idx: int, SIZE) -> tuple[int, int]:
     return (idx // 4) % SIZE[0], (idx // 4) // SIZE[0]
@@ -195,7 +195,7 @@ class TileMap:
         # print(vectmap)
 
         ### INTERLUDE ###
-        self.reset_ONMAP_thread = Thread(group=None, target=self.__reset_ONMAP, name=None)
+        self.reset_ONMAP_thread = Thread(group=None, target=self.reset_ONMAP, name=None)
         self.reset_ONMAP_thread.start()
 
         self.Surf = pygame.Surface((self.dimensions[0], self.dimensions[1]))
@@ -470,7 +470,7 @@ class TileMap:
 
         self.clear_ONMAPs.append(AX)
         if not self.reset_ONMAP_thread.is_alive():
-            self.reset_ONMAP_thread = Thread(group=None, target=self.__reset_ONMAP, name=None)
+            self.reset_ONMAP_thread = Thread(group=None, target=self.reset_ONMAP, name=None)
             self.reset_ONMAP_thread.start()
 
         # self.tt = 0
@@ -524,7 +524,7 @@ class TileMap:
         # t2 = time()
         # self.tt += t2 - t1
 
-    def __reset_ONMAP(self):
+    def reset_ONMAP(self):
         while len(self.clear_ONMAPs) > 0:
             AX = self.clear_ONMAPs.pop()
             # self.ONMAPs[AX] = deepcopy(self.TRUEMAP)
